@@ -1,7 +1,7 @@
 {
   "name": "hal-mcp",
-  "version": "1.0.5",
-  "description": "HAL (HTTP API Layer) - An MCP server for HTTP API interactions",
+  "version": "1.0.7",
+  "description": "HAL (HTTP API Layer) - An MCP server that provides HTTP API capabilities to Large Language Models with OpenAPI/Swagger integration",
   "main": "dist/index.js",
   "bin": {
     "hal-mcp": "dist/index.js"
@@ -16,13 +16,21 @@
   },
   "keywords": [
     "mcp",
+    "mcp-server",
     "model-context-protocol",
     "http",
     "api",
     "layer",
-    "typescript"
+    "typescript",
+    "claude-desktop",
+    "openapi",
+    "swagger",
+    "rest-api",
+    "http-client",
+    "llm",
+    "ai-tools"
   ],
-  "author": "Your Name",
+  "author": "Dean Ward",
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
@@ -52,10 +60,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/hal-mcp.git"
+    "url": "https://github.com/DeanWard/HAL.git"
   },
   "bugs": {
-    "url": "https://github.com/your-username/hal-mcp/issues"
+    "url": "https://github.com/DeanWard/HAL/issues"
   },
-  "homepage": "https://github.com/your-username/hal-mcp#readme"
+  "homepage": "https://github.com/DeanWard/HAL#readme"
 } 

@@ -4,7 +4,7 @@ HAL is a Model Context Protocol (MCP) server that provides HTTP API capabilities
 
 ## Features
 
-- 🌐 **HTTP GET/POST Requests**: Fetch and send data to any HTTP endpoint
+- 🌐 **HTTP GET/POST/PUT/PATCH/DELETE/OPTIONS/HEAD Requests**: Fetch and send data to any HTTP endpoint
 - 📄 **Swagger/OpenAPI Integration**: Automatically generate tools from API specifications
 - 📚 **Built-in Documentation**: Self-documenting API reference
 - 🔒 **Secure**: Runs in isolated environment with controlled access

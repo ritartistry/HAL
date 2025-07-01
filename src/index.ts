@@ -149,10 +149,29 @@ async function makeHttpRequest(
     const contentType = response.headers.get('content-type') || 'text/plain';
     let content: string;
     
-    if (contentType.includes('application/json')) {
-      content = JSON.stringify(await response.json(), null, 2);
+    // HEAD requests don't have a body by design
+    if (method.toUpperCase() === 'HEAD') {
+      content = '(No body - HEAD request)';
     } else {
-      content = await response.text();
+      try {
+        if (contentType.includes('application/json')) {
+          const text = await response.text();
+          if (text.trim()) {
+            content = JSON.stringify(JSON.parse(text), null, 2);
+          } else {
+            content = '(Empty response)';
+          }
+        } else {
+          content = await response.text();
+        }
+      } catch (parseError) {
+        // If JSON parsing fails, try to get text
+        try {
+          content = await response.text();
+        } catch (textError) {
+          content = '(Unable to parse response)';
+        }
+      }
     }
 
          return {
