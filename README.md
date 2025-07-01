@@ -146,15 +146,60 @@ HAL_SECRET_GOOGLE-CLOUD_API_KEY=your-google-key
 HAL_ALLOW_GOOGLE-CLOUD="https://*.googleapis.com/*,https://*.googlecloud.com/*"
 ```
 
-#### Parsing Rules
+#### How Parsing Works
 
-- **Namespace**: Text between `HAL_SECRET_` and the first `_` after that
-  - `-` in namespaces becomes `.` in templates
-  - Example: `AZURE-STORAGE` → `azure.storage`
-- **Key**: Text after the first `_` in the namespace
-  - `_` remains as `_` in templates
-  - Example: `ACCESS_KEY` → `access_key`
-- **Case**: Everything is converted to lowercase in templates
+Understanding how environment variable names become template keys:
+
+```
+HAL_SECRET_AZURE-STORAGE_ACCESS_KEY
+│         │              │
+│         │              └─ Key: "ACCESS_KEY" → "access_key" 
+│         └─ Namespace: "AZURE-STORAGE" → "azure.storage"
+└─ Prefix
+
+Final template: {secrets.azure.storage.access_key}
+```
+
+**Step-by-step breakdown:**
+1. Remove `HAL_SECRET_` prefix → `AZURE-STORAGE_ACCESS_KEY`
+2. Split on first `_` → Namespace: `AZURE-STORAGE`, Key: `ACCESS_KEY`
+3. Transform namespace: `AZURE-STORAGE` → `azure.storage` (dashes become dots, lowercase)
+4. Transform key: `ACCESS_KEY` → `access_key` (underscores stay, lowercase)
+5. Combine: `{secrets.azure.storage.access_key}`
+
+#### More Examples
+
+```bash
+# Simple namespace
+HAL_SECRET_GITHUB_TOKEN=your_token
+→ {secrets.github.token}
+
+# Two-level namespace  
+HAL_SECRET_AZURE-COGNITIVE_API_KEY=your_key
+→ {secrets.azure.cognitive.api_key}
+
+# Three-level namespace
+HAL_SECRET_GOOGLE-CLOUD-STORAGE_SERVICE_ACCOUNT=your_account
+→ {secrets.google.cloud.storage.service_account}
+
+# Complex key with underscores
+HAL_SECRET_AWS-S3_BUCKET_ACCESS_KEY_ID=your_id
+→ {secrets.aws.s3.bucket_access_key_id}
+
+# No namespace (legacy style)
+HAL_SECRET_API_KEY=your_key
+→ {secrets.api_key}
+```
+
+#### Visual Guide: Complete Flow
+
+```
+Environment Variable          Template Usage                   URL Restriction
+├─ HAL_SECRET_MICROSOFT_API_KEY    ├─ {secrets.microsoft.api_key}    ├─ HAL_ALLOW_MICROSOFT
+├─ HAL_SECRET_AZURE-STORAGE_KEY    ├─ {secrets.azure.storage.key}    ├─ HAL_ALLOW_AZURE-STORAGE  
+├─ HAL_SECRET_AWS-S3_ACCESS_KEY    ├─ {secrets.aws.s3.access_key}    ├─ HAL_ALLOW_AWS-S3
+└─ HAL_SECRET_UNRESTRICTED_TOKEN   └─ {secrets.unrestricted.token}   └─ (no restriction)
+```
 
 #### Security Benefits
 
@@ -162,6 +207,90 @@ HAL_ALLOW_GOOGLE-CLOUD="https://*.googleapis.com/*,https://*.googlecloud.com/*"
 - **Prevents Cross-Service Leakage**: Azure secrets can't be sent to AWS APIs
 - **Defense in Depth**: Even with AI errors or prompt injection, secrets are constrained
 - **Clear Organization**: Namespace structure makes secret management more intuitive
+
+#### Real-World Usage Scenarios
+
+**Scenario 1: Multi-Cloud Application**
+```bash
+# Azure services
+HAL_SECRET_AZURE-STORAGE_CONNECTION_STRING=DefaultEndpointsProtocol=https;...
+HAL_SECRET_AZURE-COGNITIVE_SPEECH_KEY=abcd1234...
+HAL_ALLOW_AZURE-STORAGE="https://*.blob.core.windows.net/*,https://*.queue.core.windows.net/*"
+HAL_ALLOW_AZURE-COGNITIVE="https://*.cognitiveservices.azure.com/*"
+
+# AWS services  
+HAL_SECRET_AWS-S3_ACCESS_KEY=AKIA...
+HAL_SECRET_AWS-LAMBDA_API_KEY=lambda_key...
+HAL_ALLOW_AWS-S3="https://s3.*.amazonaws.com/*,https://*.s3.amazonaws.com/*"
+HAL_ALLOW_AWS-LAMBDA="https://*.lambda.amazonaws.com/*"
+
+# Google Cloud
+HAL_SECRET_GOOGLE-CLOUD_SERVICE_ACCOUNT_KEY={"type":"service_account"...}
+HAL_ALLOW_GOOGLE-CLOUD="https://*.googleapis.com/*"
+```
+
+**Usage in requests:**
+```json
+{
+  "url": "https://mystorageaccount.blob.core.windows.net/container/file",
+  "headers": {
+    "Authorization": "Bearer {secrets.azure.storage.connection_string}"
+  }
+}
+```
+✅ **Works**: URL matches Azure Storage pattern  
+❌ **Blocked**: If used with `https://s3.amazonaws.com/bucket` - wrong service!
+
+**Scenario 2: Development vs Production**
+```bash
+# Development environment
+HAL_SECRET_DEV-API_KEY=dev_key_123
+HAL_ALLOW_DEV-API="https://dev-api.example.com/*,https://staging-api.example.com/*"
+
+# Production environment  
+HAL_SECRET_PROD-API_KEY=prod_key_456
+HAL_ALLOW_PROD-API="https://api.example.com/*"
+```
+
+**Scenario 3: Department Isolation**
+```bash
+# Marketing team APIs
+HAL_SECRET_MARKETING-CRM_API_KEY=crm_key...
+HAL_SECRET_MARKETING-ANALYTICS_TOKEN=analytics_token...
+HAL_ALLOW_MARKETING-CRM="https://api.salesforce.com/*"
+HAL_ALLOW_MARKETING-ANALYTICS="https://api.googleanalytics.com/*"
+
+# Engineering team APIs
+HAL_SECRET_ENGINEERING-GITHUB_TOKEN=ghp_...
+HAL_SECRET_ENGINEERING-JIRA_API_KEY=jira_key...
+HAL_ALLOW_ENGINEERING-GITHUB="https://api.github.com/*"
+HAL_ALLOW_ENGINEERING-JIRA="https://*.atlassian.net/*"
+```
+
+#### Error Examples
+
+When URL restrictions are violated, you get clear error messages:
+
+```
+❌ Error: Secret 'azure.storage.access_key' (namespace: AZURE-STORAGE) is not allowed for URL 'https://api.github.com/user'. 
+   Allowed patterns: https://*.blob.core.windows.net/*, https://*.queue.core.windows.net/*
+```
+
+This helps you quickly identify:
+- Which secret was blocked
+- What URL was attempted  
+- What URLs are actually allowed
+
+#### Quick Reference
+
+| Environment Variable | Template Usage | URL Restriction |
+|---------------------|----------------|-----------------|
+| `HAL_SECRET_GITHUB_TOKEN` | `{secrets.github.token}` | `HAL_ALLOW_GITHUB` |
+| `HAL_SECRET_AZURE-STORAGE_KEY` | `{secrets.azure.storage.key}` | `HAL_ALLOW_AZURE-STORAGE` |
+| `HAL_SECRET_AWS-S3_ACCESS_KEY` | `{secrets.aws.s3.access_key}` | `HAL_ALLOW_AWS-S3` |
+| `HAL_SECRET_GOOGLE-CLOUD_API_KEY` | `{secrets.google.cloud.api_key}` | `HAL_ALLOW_GOOGLE-CLOUD` |
+
+**Pattern**: `HAL_SECRET_<NAMESPACE>_<KEY>` → `{secrets.<namespace>.<key>}` + `HAL_ALLOW_<NAMESPACE>`
 
 #### Backward Compatibility
 
