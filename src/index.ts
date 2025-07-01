@@ -14,54 +14,147 @@ const SWAGGER_FILE_PATH = process.env.HAL_SWAGGER_FILE;
 const API_BASE_URL = process.env.HAL_API_BASE_URL;
 
 // Secrets management
+interface SecretInfo {
+  value: string;
+  namespace?: string;
+  allowedUrls?: string[];
+}
+
 interface SecretsStore {
-  [key: string]: string;
+  [key: string]: SecretInfo;
 }
 
 let secrets: SecretsStore = {};
 
+// Parse namespace and key from environment variable name
+function parseSecretKey(envKey: string): { namespace: string | undefined, key: string, templateKey: string } {
+  const withoutPrefix = envKey.replace('HAL_SECRET_', '');
+  const firstUnderscoreIndex = withoutPrefix.indexOf('_');
+  
+  if (firstUnderscoreIndex === -1) {
+    // No namespace, just a key
+    const key = withoutPrefix.toLowerCase();
+    return { namespace: undefined, key, templateKey: key };
+  }
+  
+  const namespace = withoutPrefix.substring(0, firstUnderscoreIndex);
+  const key = withoutPrefix.substring(firstUnderscoreIndex + 1);
+  
+  // Convert namespace: AZURE-STORAGE -> azure.storage
+  const namespaceTemplate = namespace.toLowerCase().replace(/-/g, '.');
+  // Convert key: ACCESS_KEY -> access_key
+  const keyTemplate = key.toLowerCase();
+  
+  const templateKey = namespace ? `${namespaceTemplate}.${keyTemplate}` : keyTemplate;
+  
+  return { namespace, key: keyTemplate, templateKey };
+}
+
+// Load URL restrictions from environment variables
+function loadUrlRestrictions(): Record<string, string[]> {
+  const restrictions: Record<string, string[]> = {};
+  
+  for (const [key, value] of Object.entries(process.env)) {
+    if (key.startsWith('HAL_ALLOW_') && value) {
+      const namespace = key.replace('HAL_ALLOW_', '');
+      const urls = value.split(',').map(url => url.trim()).filter(url => url.length > 0);
+      restrictions[namespace] = urls;
+    }
+  }
+  
+  return restrictions;
+}
+
+// Check if a URL matches any of the allowed patterns
+function isUrlAllowed(url: string, allowedPatterns: string[]): boolean {
+  for (const pattern of allowedPatterns) {
+    if (matchesUrlPattern(url, pattern)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// Match URL against a pattern (supports * wildcards)
+function matchesUrlPattern(url: string, pattern: string): boolean {
+  // Convert pattern to regex
+  // Escape special regex characters except *
+  const escapedPattern = pattern
+    .replace(/[.+?^${}()|[\]\\]/g, '\\$&')
+    .replace(/\*/g, '.*');
+  
+  const regex = new RegExp(`^${escapedPattern}$`, 'i');
+  return regex.test(url);
+}
+
 // Load secrets from environment variables with HAL_SECRET_ prefix
 function loadSecrets(): void {
   secrets = {};
+  const urlRestrictions = loadUrlRestrictions();
+  
   for (const [key, value] of Object.entries(process.env)) {
     if (key.startsWith('HAL_SECRET_') && value) {
-      const secretKey = key.replace('HAL_SECRET_', '').toLowerCase();
-      secrets[secretKey] = value;
+      const { namespace, key: secretKey, templateKey } = parseSecretKey(key);
+      
+      const secretInfo: SecretInfo = {
+        value,
+        namespace,
+        allowedUrls: namespace ? urlRestrictions[namespace] : undefined
+      };
+      
+      secrets[templateKey] = secretInfo;
     }
   }
   
   if (Object.keys(secrets).length > 0) {
     console.error(`Loaded ${Object.keys(secrets).length} secrets from environment variables`);
+    
+    // Log namespace restrictions (without secret values)
+    const restrictedCount = Object.values(secrets).filter(s => s.allowedUrls).length;
+    if (restrictedCount > 0) {
+      console.error(`${restrictedCount} secrets have URL restrictions`);
+    }
   }
 }
 
-// Template substitution function
-function substituteSecrets(template: string): string {
+// Template substitution function with URL validation
+function substituteSecrets(template: string, targetUrl?: string): string {
   if (!template || typeof template !== 'string') {
     return template;
   }
   
   return template.replace(/\{secrets\.([^}]+)\}/g, (match, secretKey) => {
     const key = secretKey.toLowerCase();
-    if (secrets[key]) {
-      return secrets[key];
-    } else {
+    const secretInfo = secrets[key];
+    
+    if (!secretInfo) {
       console.error(`Warning: Secret '${secretKey}' not found. Available secrets: ${Object.keys(secrets).join(', ')}`);
       return match; // Return original placeholder if secret not found
     }
+    
+    // Check URL restrictions if they exist
+    if (secretInfo.allowedUrls && targetUrl) {
+      if (!isUrlAllowed(targetUrl, secretInfo.allowedUrls)) {
+        const namespace = secretInfo.namespace || 'unknown';
+        console.error(`Error: Secret '${secretKey}' (namespace: ${namespace}) is not allowed for URL '${targetUrl}'. Allowed patterns: ${secretInfo.allowedUrls.join(', ')}`);
+        throw new Error(`Secret '${secretKey}' is not allowed for URL '${targetUrl}'`);
+      }
+    }
+    
+    return secretInfo.value;
   });
 }
 
-// Helper function to recursively substitute secrets in objects
-function substituteSecretsInObject(obj: any): any {
+// Helper function to recursively substitute secrets in objects with URL validation
+function substituteSecretsInObject(obj: any, targetUrl?: string): any {
   if (typeof obj === 'string') {
-    return substituteSecrets(obj);
+    return substituteSecrets(obj, targetUrl);
   } else if (Array.isArray(obj)) {
-    return obj.map(item => substituteSecretsInObject(item));
+    return obj.map(item => substituteSecretsInObject(item, targetUrl));
   } else if (obj && typeof obj === 'object') {
     const result: any = {};
     for (const [key, value] of Object.entries(obj)) {
-      result[key] = substituteSecretsInObject(value);
+      result[key] = substituteSecretsInObject(value, targetUrl);
     }
     return result;
   }
@@ -177,11 +270,14 @@ async function makeHttpRequest(
   try {
     const { headers = {}, body, queryParams = {} } = options;
     
-    // Substitute secrets in URL, headers, body, and query parameters
-    const processedUrl = substituteSecrets(url);
-    const processedHeaders = substituteSecretsInObject(headers);
-    const processedBody = body ? substituteSecrets(body) : body;
-    const processedQueryParams = substituteSecretsInObject(queryParams);
+    // First, substitute secrets in URL to get the final URL for validation
+    // We need to do this in two passes to handle URL restrictions properly
+    const processedUrl = substituteSecrets(url, url);
+    
+    // Now substitute secrets in headers, body, and query parameters using the processed URL
+    const processedHeaders = substituteSecretsInObject(headers, processedUrl);
+    const processedBody = body ? substituteSecrets(body, processedUrl) : body;
+    const processedQueryParams = substituteSecretsInObject(queryParams, processedUrl);
     
     // Build URL with query parameters
     const urlObj = new URL(processedUrl);
@@ -483,23 +579,72 @@ server.registerTool(
         return {
           content: [{
             type: "text" as const,
-            text: "No secrets are currently configured. To add secrets, set environment variables with the HAL_SECRET_ prefix.\n\nExample:\n  HAL_SECRET_API_KEY=your_api_key\n  HAL_SECRET_TOKEN=your_token\n\nThen use them in requests like: {secrets.api_key} or {secrets.token}"
+            text: "No secrets are currently configured. To add secrets, set environment variables with the HAL_SECRET_ prefix.\n\nExample:\n  HAL_SECRET_API_KEY=your_api_key\n  HAL_SECRET_TOKEN=your_token\n\nThen use them in requests like: {secrets.api_key} or {secrets.token}\n\nFor namespaced secrets with URL restrictions:\n  HAL_SECRET_MICROSOFT_API_KEY=your_api_key\n  HAL_ALLOW_MICROSOFT=\"https://azure.microsoft.com/*\"\n  Usage: {secrets.microsoft.api_key}"
           }]
         };
       }
       
       let response = `Available secrets (${secretKeys.length} total):\n\n`;
-      response += "You can use these secret keys in your HTTP requests using the {secrets.key} syntax:\n\n";
       
-      secretKeys.forEach((key, index) => {
-        response += `${index + 1}. {secrets.${key}}\n`;
-      });
+      // Group secrets by namespace
+      const namespacedSecrets: Record<string, string[]> = {};
+      const unrestrictedSecrets: string[] = [];
       
-      response += "\n**Usage examples:**\n";
-      response += `- URL: "https://api.example.com/data?token={secrets.${secretKeys[0] || 'token'}}"\n`;
-      response += `- Header: {"Authorization": "Bearer {secrets.${secretKeys[0] || 'api_key'}}"}\n`;
+      for (const [key, secretInfo] of Object.entries(secrets)) {
+        if (secretInfo.namespace) {
+          const namespaceTemplate = secretInfo.namespace.toLowerCase().replace(/-/g, '.');
+          if (!namespacedSecrets[namespaceTemplate]) {
+            namespacedSecrets[namespaceTemplate] = [];
+          }
+          namespacedSecrets[namespaceTemplate].push(key);
+        } else {
+          unrestrictedSecrets.push(key);
+        }
+      }
+      
+      // Show unrestricted secrets first
+      if (unrestrictedSecrets.length > 0) {
+        response += "**Unrestricted Secrets** (can be used with any URL):\n";
+        unrestrictedSecrets.forEach((key, index) => {
+          response += `${index + 1}. {secrets.${key}}\n`;
+        });
+        response += "\n";
+      }
+      
+      // Show namespaced secrets with their restrictions
+      for (const [namespace, keys] of Object.entries(namespacedSecrets)) {
+        const firstKey = keys[0];
+        const secretInfo = secrets[firstKey];
+        
+        response += `**Namespace: ${namespace}**\n`;
+        if (secretInfo.allowedUrls && secretInfo.allowedUrls.length > 0) {
+          response += `Restricted to URLs: ${secretInfo.allowedUrls.join(', ')}\n`;
+        } else {
+          response += "No URL restrictions (can be used with any URL)\n";
+        }
+        response += "Secrets:\n";
+        
+        keys.forEach((key, index) => {
+          response += `${index + 1}. {secrets.${key}}\n`;
+        });
+        response += "\n";
+      }
+      
+      response += "**Usage examples:**\n";
+      const exampleKey = secretKeys[0] || 'token';
+      response += `- URL: "https://api.example.com/data?token={secrets.${exampleKey}}"\n`;
+      response += `- Header: {"Authorization": "Bearer {secrets.${exampleKey}}"}\n`;
       response += `- Body: {"username": "{secrets.${secretKeys.find(k => k.includes('user')) || 'username'}}"}\n\n`;
-      response += "**Security Note:** Only the key names are shown here. The actual secret values are never exposed to the AI and are substituted securely at request time.";
+      
+      response += "**Security Notes:**\n";
+      response += "- Only the key names are shown here. The actual secret values are never exposed to the AI.\n";
+      response += "- Secrets are substituted securely at request time.\n";
+      
+      const restrictedCount = Object.values(secrets).filter(s => s.allowedUrls).length;
+      if (restrictedCount > 0) {
+        response += `- ${restrictedCount} secrets have URL restrictions for enhanced security.\n`;
+        response += "- If a secret is restricted, it will only work with URLs matching its allowed patterns.\n";
+      }
       
       return {
         content: [{

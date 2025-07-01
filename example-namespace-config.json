@@ -1,0 +1,32 @@
+{
+  "mcpServers": {
+    "hal-with-namespaced-secrets": {
+      "command": "npx",
+      "args": ["hal-mcp"],
+      "env": {
+        "HAL_SECRET_MICROSOFT_API_KEY": "your_microsoft_api_key_here",
+        "HAL_ALLOW_MICROSOFT": "https://azure.microsoft.com/*,https://*.microsoft.com/*",
+        
+        "HAL_SECRET_AZURE-STORAGE_ACCESS_KEY": "your_azure_storage_key_here",
+        "HAL_SECRET_AZURE-STORAGE_CONNECTION_STRING": "your_azure_storage_connection_string_here",
+        "HAL_ALLOW_AZURE-STORAGE": "https://*.blob.core.windows.net/*,https://*.queue.core.windows.net/*,https://*.table.core.windows.net/*",
+        
+        "HAL_SECRET_AZURE-COGNITIVE_API_KEY": "your_azure_cognitive_key_here",
+        "HAL_ALLOW_AZURE-COGNITIVE": "https://*.cognitiveservices.azure.com/*",
+        
+        "HAL_SECRET_GOOGLE-CLOUD_SERVICE_ACCOUNT_KEY": "your_google_service_account_key_here",
+        "HAL_SECRET_GOOGLE-CLOUD_PROJECT_ID": "your_google_project_id_here",
+        "HAL_ALLOW_GOOGLE-CLOUD": "https://*.googleapis.com/*,https://*.googlecloud.com/*",
+        
+        "HAL_SECRET_AWS-S3_ACCESS_KEY": "your_aws_s3_access_key_here",
+        "HAL_SECRET_AWS-S3_SECRET_KEY": "your_aws_s3_secret_key_here",
+        "HAL_ALLOW_AWS-S3": "https://*.amazonaws.com/*,https://s3.*.amazonaws.com/*",
+        
+        "HAL_SECRET_GITHUB_TOKEN": "your_github_token_here",
+        "HAL_ALLOW_GITHUB": "https://api.github.com/*,https://github.com/*",
+        
+        "HAL_SECRET_UNRESTRICTED_API_KEY": "your_unrestricted_api_key_here"
+      }
+    }
+  }
+} 

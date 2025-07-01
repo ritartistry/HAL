@@ -5,6 +5,32 @@ All notable changes to HAL (HTTP API Layer) will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.9] - 2024-12-26
+
+### Added
+- 🚀 **Namespace and URL Restrictions**: Organize secrets with namespaces and restrict them to specific URLs
+- **Hierarchical namespace support**: Use `-` for namespace separators (e.g., `AZURE-STORAGE` → `azure.storage`)
+- **URL pattern matching**: Restrict secrets to specific domains using `HAL_ALLOW_*` variables with wildcard support
+- **Enhanced `list-secrets` tool**: Shows namespace groupings and URL restrictions for each secret
+- **Defense in depth security**: Prevents cross-service secret leakage even with AI errors or prompt injection
+
+### Enhanced
+- **Namespace convention**: `HAL_SECRET_AZURE-STORAGE_ACCESS_KEY` → `{secrets.azure.storage.access_key}`
+- **URL validation**: Secrets with restrictions throw errors if used with non-matching URLs
+- **Backward compatibility**: Non-namespaced secrets continue to work without restrictions
+- **Comprehensive documentation**: Updated README with namespace examples and security benefits
+
+### Security
+- **Principle of least privilege**: Secrets only work with their intended services
+- **URL restriction enforcement**: Runtime validation prevents secrets from being sent to unauthorized domains
+- **Clear error messages**: Failed URL validations provide helpful debugging information
+- **Namespace isolation**: Different namespaces can have completely different URL restrictions
+
+### Examples
+- `HAL_SECRET_MICROSOFT_API_KEY` + `HAL_ALLOW_MICROSOFT="https://azure.microsoft.com/*"`
+- `HAL_SECRET_AZURE-STORAGE_ACCESS_KEY` + `HAL_ALLOW_AZURE-STORAGE="https://*.blob.core.windows.net/*"`
+- Multi-level namespaces: `HAL_SECRET_GOOGLE-CLOUD-STORAGE_SERVICE_ACCOUNT_KEY`
+
 ## [1.0.8] - 2024-12-25
 
 ### Added

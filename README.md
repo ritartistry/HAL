@@ -84,6 +84,7 @@ HAL supports the following environment variables:
 - `HAL_SWAGGER_FILE`: Path to OpenAPI/Swagger specification file (JSON or YAML format)
 - `HAL_API_BASE_URL`: Base URL for API requests (overrides the servers specified in the OpenAPI spec)
 - `HAL_SECRET_*`: Secret values for secure substitution in requests (e.g., `HAL_SECRET_TOKEN=abc123`)
+- `HAL_ALLOW_*`: URL restrictions for namespaced secrets (e.g., `HAL_ALLOW_MICROSOFT="https://azure.microsoft.com/*"`)
 
 ## Secret Management
 
@@ -104,6 +105,72 @@ HAL provides secure secret management to keep sensitive information like API key
    - **Request Bodies**: `{"username": "{secrets.username}", "password": "{secrets.password}"}`
 
 3. **Security**: The AI never sees the actual secret values, only the template placeholders. Values are substituted at request time.
+
+### Namespaces and URL Restrictions
+
+HAL supports organizing secrets into namespaces and restricting them to specific URLs for enhanced security:
+
+#### Namespace Convention
+
+Use `-` for namespace separators and `_` for word separators within keys:
+
+```bash
+# Single namespace
+HAL_SECRET_MICROSOFT_API_KEY=your-api-key
+# Usage: {secrets.microsoft.api_key}
+
+# Multi-level namespaces
+HAL_SECRET_AZURE-STORAGE_ACCESS_KEY=your-storage-key
+HAL_SECRET_AZURE-COGNITIVE_API_KEY=your-cognitive-key
+HAL_SECRET_GOOGLE-CLOUD-STORAGE_SERVICE_ACCOUNT_KEY=your-service-key
+# Usage: {secrets.azure.storage.access_key}
+# Usage: {secrets.azure.cognitive.api_key}
+# Usage: {secrets.google.cloud.storage.service_account_key}
+```
+
+#### URL Restrictions
+
+Restrict namespaced secrets to specific URLs using `HAL_ALLOW_*` environment variables:
+
+```bash
+# Restrict Microsoft secrets to Microsoft domains
+HAL_SECRET_MICROSOFT_API_KEY=your-api-key
+HAL_ALLOW_MICROSOFT="https://azure.microsoft.com/*,https://*.microsoft.com/*"
+
+# Restrict Azure Storage secrets to Azure storage endpoints
+HAL_SECRET_AZURE-STORAGE_ACCESS_KEY=your-storage-key
+HAL_ALLOW_AZURE-STORAGE="https://*.blob.core.windows.net/*,https://*.queue.core.windows.net/*"
+
+# Multiple URLs are comma-separated
+HAL_SECRET_GOOGLE-CLOUD_API_KEY=your-google-key
+HAL_ALLOW_GOOGLE-CLOUD="https://*.googleapis.com/*,https://*.googlecloud.com/*"
+```
+
+#### Parsing Rules
+
+- **Namespace**: Text between `HAL_SECRET_` and the first `_` after that
+  - `-` in namespaces becomes `.` in templates
+  - Example: `AZURE-STORAGE` → `azure.storage`
+- **Key**: Text after the first `_` in the namespace
+  - `_` remains as `_` in templates
+  - Example: `ACCESS_KEY` → `access_key`
+- **Case**: Everything is converted to lowercase in templates
+
+#### Security Benefits
+
+- **Principle of Least Privilege**: Secrets only work with their intended services
+- **Prevents Cross-Service Leakage**: Azure secrets can't be sent to AWS APIs
+- **Defense in Depth**: Even with AI errors or prompt injection, secrets are constrained
+- **Clear Organization**: Namespace structure makes secret management more intuitive
+
+#### Backward Compatibility
+
+Non-namespaced secrets (without URL restrictions) continue to work as before:
+
+```bash
+HAL_SECRET_API_KEY=your-key
+# Usage: {secrets.api_key} - works with any URL (no restrictions)
+```
 
 ### Example Usage
 
