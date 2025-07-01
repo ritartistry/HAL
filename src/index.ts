@@ -13,6 +13,61 @@ import * as YAML from "yaml";
 const SWAGGER_FILE_PATH = process.env.HAL_SWAGGER_FILE;
 const API_BASE_URL = process.env.HAL_API_BASE_URL;
 
+// Secrets management
+interface SecretsStore {
+  [key: string]: string;
+}
+
+let secrets: SecretsStore = {};
+
+// Load secrets from environment variables with HAL_SECRET_ prefix
+function loadSecrets(): void {
+  secrets = {};
+  for (const [key, value] of Object.entries(process.env)) {
+    if (key.startsWith('HAL_SECRET_') && value) {
+      const secretKey = key.replace('HAL_SECRET_', '').toLowerCase();
+      secrets[secretKey] = value;
+    }
+  }
+  
+  if (Object.keys(secrets).length > 0) {
+    console.error(`Loaded ${Object.keys(secrets).length} secrets from environment variables`);
+  }
+}
+
+// Template substitution function
+function substituteSecrets(template: string): string {
+  if (!template || typeof template !== 'string') {
+    return template;
+  }
+  
+  return template.replace(/\{secrets\.([^}]+)\}/g, (match, secretKey) => {
+    const key = secretKey.toLowerCase();
+    if (secrets[key]) {
+      return secrets[key];
+    } else {
+      console.error(`Warning: Secret '${secretKey}' not found. Available secrets: ${Object.keys(secrets).join(', ')}`);
+      return match; // Return original placeholder if secret not found
+    }
+  });
+}
+
+// Helper function to recursively substitute secrets in objects
+function substituteSecretsInObject(obj: any): any {
+  if (typeof obj === 'string') {
+    return substituteSecrets(obj);
+  } else if (Array.isArray(obj)) {
+    return obj.map(item => substituteSecretsInObject(item));
+  } else if (obj && typeof obj === 'object') {
+    const result: any = {};
+    for (const [key, value] of Object.entries(obj)) {
+      result[key] = substituteSecretsInObject(value);
+    }
+    return result;
+  }
+  return obj;
+}
+
 // Types for OpenAPI/Swagger
 interface OpenAPISpec {
   openapi?: string;
@@ -122,9 +177,15 @@ async function makeHttpRequest(
   try {
     const { headers = {}, body, queryParams = {} } = options;
     
+    // Substitute secrets in URL, headers, body, and query parameters
+    const processedUrl = substituteSecrets(url);
+    const processedHeaders = substituteSecretsInObject(headers);
+    const processedBody = body ? substituteSecrets(body) : body;
+    const processedQueryParams = substituteSecretsInObject(queryParams);
+    
     // Build URL with query parameters
-    const urlObj = new URL(url);
-    Object.entries(queryParams).forEach(([key, value]) => {
+    const urlObj = new URL(processedUrl);
+    Object.entries(processedQueryParams).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
         urlObj.searchParams.set(key, String(value));
       }
@@ -132,18 +193,18 @@ async function makeHttpRequest(
     
     const defaultHeaders = {
       'User-Agent': 'HAL-MCP/1.0.0',
-      ...headers
+      ...processedHeaders
     };
     
          // Add Content-Type for methods that typically send data
-     if (['POST', 'PUT', 'PATCH'].includes(method.toUpperCase()) && body && !('Content-Type' in headers)) {
+     if (['POST', 'PUT', 'PATCH'].includes(method.toUpperCase()) && processedBody && !('Content-Type' in processedHeaders)) {
        (defaultHeaders as any)['Content-Type'] = 'application/json';
      }
     
     const response = await fetch(urlObj.toString(), {
       method: method.toUpperCase(),
       headers: defaultHeaders,
-      body: body
+      body: processedBody
     });
 
     const contentType = response.headers.get('content-type') || 'text/plain';
@@ -287,7 +348,7 @@ server.registerTool(
   "http-get",
   {
     title: "HTTP GET Request",
-    description: "Make an HTTP GET request to a specified URL",
+    description: "Make an HTTP GET request to a specified URL. Supports secret substitution using {secrets.key} syntax where 'key' corresponds to HAL_SECRET_KEY environment variables.",
     inputSchema: { 
       url: z.string().url(),
       headers: z.record(z.string()).optional()
@@ -302,7 +363,7 @@ server.registerTool(
   "http-post",
   {
     title: "HTTP POST Request",
-    description: "Make an HTTP POST request to a specified URL with optional body and headers",
+    description: "Make an HTTP POST request to a specified URL with optional body and headers. Supports secret substitution using {secrets.key} syntax in URL, headers, and body where 'key' corresponds to HAL_SECRET_KEY environment variables.",
     inputSchema: {
       url: z.string().url(),
       body: z.string().optional(),
@@ -323,7 +384,7 @@ server.registerTool(
   "http-put",
   {
     title: "HTTP PUT Request",
-    description: "Make an HTTP PUT request to a specified URL with optional body and headers",
+    description: "Make an HTTP PUT request to a specified URL with optional body and headers. Supports secret substitution using {secrets.key} syntax in URL, headers, and body where 'key' corresponds to HAL_SECRET_KEY environment variables.",
     inputSchema: {
       url: z.string().url(),
       body: z.string().optional(),
@@ -344,7 +405,7 @@ server.registerTool(
   "http-patch",
   {
     title: "HTTP PATCH Request",
-    description: "Make an HTTP PATCH request to a specified URL with optional body and headers",
+    description: "Make an HTTP PATCH request to a specified URL with optional body and headers. Supports secret substitution using {secrets.key} syntax in URL, headers, and body where 'key' corresponds to HAL_SECRET_KEY environment variables.",
     inputSchema: {
       url: z.string().url(),
       body: z.string().optional(),
@@ -365,7 +426,7 @@ server.registerTool(
   "http-delete",
   {
     title: "HTTP DELETE Request",
-    description: "Make an HTTP DELETE request to a specified URL with optional headers",
+    description: "Make an HTTP DELETE request to a specified URL with optional headers. Supports secret substitution using {secrets.key} syntax in URL and headers where 'key' corresponds to HAL_SECRET_KEY environment variables.",
     inputSchema: {
       url: z.string().url(),
       headers: z.record(z.string()).optional()
@@ -380,7 +441,7 @@ server.registerTool(
   "http-head",
   {
     title: "HTTP HEAD Request",
-    description: "Make an HTTP HEAD request to a specified URL with optional headers (returns only headers, no body)",
+    description: "Make an HTTP HEAD request to a specified URL with optional headers (returns only headers, no body). Supports secret substitution using {secrets.key} syntax in URL and headers where 'key' corresponds to HAL_SECRET_KEY environment variables.",
     inputSchema: {
       url: z.string().url(),
       headers: z.record(z.string()).optional()
@@ -395,7 +456,7 @@ server.registerTool(
   "http-options",
   {
     title: "HTTP OPTIONS Request",
-    description: "Make an HTTP OPTIONS request to a specified URL to check available methods and headers",
+    description: "Make an HTTP OPTIONS request to a specified URL to check available methods and headers. Supports secret substitution using {secrets.key} syntax in URL and headers where 'key' corresponds to HAL_SECRET_KEY environment variables.",
     inputSchema: {
       url: z.string().url(),
       headers: z.record(z.string()).optional()
@@ -403,6 +464,58 @@ server.registerTool(
   },
   async ({ url, headers = {} }: { url: string; headers?: Record<string, string> }) => {
     return makeHttpRequest('OPTIONS', url, { headers });
+  }
+);
+
+// Register secrets listing tool
+server.registerTool(
+  "list-secrets",
+  {
+    title: "List Available Secrets",
+    description: "Get a list of available secret keys that can be used with {secrets.key} syntax. Only shows the key names, never the actual secret values.",
+    inputSchema: {}
+  },
+  async () => {
+    try {
+      const secretKeys = Object.keys(secrets);
+      
+      if (secretKeys.length === 0) {
+        return {
+          content: [{
+            type: "text" as const,
+            text: "No secrets are currently configured. To add secrets, set environment variables with the HAL_SECRET_ prefix.\n\nExample:\n  HAL_SECRET_API_KEY=your_api_key\n  HAL_SECRET_TOKEN=your_token\n\nThen use them in requests like: {secrets.api_key} or {secrets.token}"
+          }]
+        };
+      }
+      
+      let response = `Available secrets (${secretKeys.length} total):\n\n`;
+      response += "You can use these secret keys in your HTTP requests using the {secrets.key} syntax:\n\n";
+      
+      secretKeys.forEach((key, index) => {
+        response += `${index + 1}. {secrets.${key}}\n`;
+      });
+      
+      response += "\n**Usage examples:**\n";
+      response += `- URL: "https://api.example.com/data?token={secrets.${secretKeys[0] || 'token'}}"\n`;
+      response += `- Header: {"Authorization": "Bearer {secrets.${secretKeys[0] || 'api_key'}}"}\n`;
+      response += `- Body: {"username": "{secrets.${secretKeys.find(k => k.includes('user')) || 'username'}}"}\n\n`;
+      response += "**Security Note:** Only the key names are shown here. The actual secret values are never exposed to the AI and are substituted securely at request time.";
+      
+      return {
+        content: [{
+          type: "text" as const,
+          text: response
+        }]
+      };
+    } catch (error) {
+      return {
+        content: [{
+          type: "text" as const,
+          text: `Error listing secrets: ${error instanceof Error ? error.message : 'Unknown error'}`
+        }],
+        isError: true
+      };
+    }
   }
 );
 
@@ -1074,43 +1187,82 @@ server.registerResource(
   async (uri: { href: string }) => {
     let docsContent = `# HAL (HTTP API Layer) Documentation
 
+## Features
+
+### Secret Management
+
+HAL supports secure secret management through environment variables. You can define secrets using the \`HAL_SECRET_\` prefix and reference them in your HTTP requests using the \`{secrets.key}\` syntax.
+
+**Setup:**
+1. Set environment variables with the \`HAL_SECRET_\` prefix:
+   - \`HAL_SECRET_TOKEN=your_api_token\`
+   - \`HAL_SECRET_USERNAME=your_username\`
+   - \`HAL_SECRET_PASSWORD=your_password\`
+
+2. Use the secrets in your requests:
+   - URLs: \`https://api.example.com/user?token={secrets.token}\`
+   - Headers: \`{"Authorization": "Bearer {secrets.token}"}\`
+   - Request bodies: \`{"username": "{secrets.username}", "password": "{secrets.password}"}\`
+
+**Security Benefits:**
+- Secret values are never visible to the AI
+- Secrets are substituted at request time
+- Environment-based configuration supports different deployment environments
+
 ## Available Tools
 
 ### Built-in HTTP Tools
 
+#### list-secrets
+Get a list of available secret keys that can be used with {secrets.key} syntax.
+
+**Parameters:** None
+
+**Example Response:**
+\`\`\`
+Available secrets (3 total):
+
+You can use these secret keys in your HTTP requests using the {secrets.key} syntax:
+
+1. {secrets.api_key}
+2. {secrets.github_token}
+3. {secrets.username}
+\`\`\`
+
 #### http-get
-Make HTTP GET requests to any URL.
+Make HTTP GET requests to any URL with secret substitution support.
 
 **Parameters:**
-- \`url\` (required): The URL to request
-- \`headers\` (optional): Object of additional headers to send
+- \`url\` (required): The URL to request (supports {secrets.key} substitution)
+- \`headers\` (optional): Object of additional headers to send (supports {secrets.key} substitution)
 
 **Example:**
 \`\`\`
 {
-  "url": "https://api.github.com/users/octocat",
+  "url": "https://api.github.com/user?access_token={secrets.github_token}",
   "headers": {
-    "Accept": "application/vnd.github.v3+json"
+    "Accept": "application/vnd.github.v3+json",
+    "Authorization": "Bearer {secrets.github_token}"
   }
 }
 \`\`\`
 
 #### http-post
-Make HTTP POST requests with optional body and headers.
+Make HTTP POST requests with optional body and headers with secret substitution support.
 
 **Parameters:**
-- \`url\` (required): The URL to request
-- \`body\` (optional): Request body content
-- \`headers\` (optional): Object of additional headers to send
+- \`url\` (required): The URL to request (supports {secrets.key} substitution)
+- \`body\` (optional): Request body content (supports {secrets.key} substitution)
+- \`headers\` (optional): Object of additional headers to send (supports {secrets.key} substitution)
 - \`contentType\` (optional): Content-Type header (default: application/json)
 
 **Example:**
 \`\`\`
 {
-  "url": "https://httpbin.org/post",
-  "body": "{\\"key\\": \\"value\\"}",
+  "url": "https://api.example.com/login",
+  "body": "{\\"username\\": \\"{secrets.username}\\", \\"password\\": \\"{secrets.password}\\"}",
   "headers": {
-    "Authorization": "Bearer token123"
+    "Authorization": "Bearer {secrets.api_key}"
   },
   "contentType": "application/json"
 }
@@ -1173,6 +1325,7 @@ HAL supports the following environment variables:
 
 - \`HAL_SWAGGER_FILE\`: Path to OpenAPI/Swagger specification file (JSON or YAML)
 - \`HAL_API_BASE_URL\`: Base URL for API requests (overrides servers in spec)
+- \`HAL_SECRET_*\`: Secret values for substitution (e.g., \`HAL_SECRET_TOKEN=abc123\` allows using \`{secrets.token}\` in requests)
 
 ## Usage
 
@@ -1191,6 +1344,9 @@ HAL can be used with any MCP-compatible client to provide HTTP API capabilities 
 // Start the server with stdio transport
 async function main() {
   try {
+    // Load secrets from environment variables
+    loadSecrets();
+    
     // Load and register Swagger tools if configured
     if (SWAGGER_FILE_PATH) {
       console.error(`Loading Swagger specification from: ${SWAGGER_FILE_PATH}`);

@@ -5,6 +5,26 @@ All notable changes to HAL (HTTP API Layer) will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.8] - 2024-12-25
+
+### Added
+- 🔐 **Secure Secret Management**: Environment-based secrets with `{secrets.key}` substitution
+- **`list-secrets` tool**: Allows AI to discover available secret keys without exposing values
+- **Secret substitution in all HTTP methods**: URLs, headers, and request bodies support `{secrets.key}` syntax
+- **Comprehensive secrets documentation**: Usage examples and security best practices
+
+### Enhanced
+- All HTTP tools now support secret substitution (`http-get`, `http-post`, `http-put`, `http-patch`, `http-delete`, `http-head`, `http-options`)
+- Updated tool descriptions to document secrets support
+- Enhanced API documentation with secrets examples
+- Swagger/OpenAPI integration works seamlessly with secrets
+
+### Security
+- Secrets are loaded from `HAL_SECRET_*` environment variables
+- AI never sees actual secret values, only template placeholders
+- Runtime substitution ensures secure handling
+- No secret leakage in conversation logs
+
 ## [1.0.7] - 2024-07-01
 
 ### Added

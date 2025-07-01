@@ -5,6 +5,7 @@ HAL is a Model Context Protocol (MCP) server that provides HTTP API capabilities
 ## Features
 
 - 🌐 **HTTP GET/POST/PUT/PATCH/DELETE/OPTIONS/HEAD Requests**: Fetch and send data to any HTTP endpoint
+- 🔐 **Secure Secret Management**: Environment-based secrets with `{secrets.key}` substitution
 - 📄 **Swagger/OpenAPI Integration**: Automatically generate tools from API specifications
 - 📚 **Built-in Documentation**: Self-documenting API reference
 - 🔒 **Secure**: Runs in isolated environment with controlled access
@@ -44,9 +45,9 @@ Add HAL to your Claude Desktop configuration:
 }
 ```
 
-### With Swagger/OpenAPI Integration
+### With Swagger/OpenAPI Integration and Secrets
 
-To enable automatic tool generation from an OpenAPI specification:
+To enable automatic tool generation from an OpenAPI specification and use secrets:
 
 ```json
 {
@@ -56,7 +57,10 @@ To enable automatic tool generation from an OpenAPI specification:
       "args": ["hal-mcp"],
       "env": {
         "HAL_SWAGGER_FILE": "/path/to/your/openapi.json",
-        "HAL_API_BASE_URL": "https://api.example.com"
+        "HAL_API_BASE_URL": "https://api.example.com",
+        "HAL_SECRET_API_KEY": "your-secret-api-key",
+        "HAL_SECRET_USERNAME": "your-username",
+        "HAL_SECRET_PASSWORD": "your-password"
       }
     }
   }
@@ -79,12 +83,71 @@ HAL supports the following environment variables:
 
 - `HAL_SWAGGER_FILE`: Path to OpenAPI/Swagger specification file (JSON or YAML format)
 - `HAL_API_BASE_URL`: Base URL for API requests (overrides the servers specified in the OpenAPI spec)
+- `HAL_SECRET_*`: Secret values for secure substitution in requests (e.g., `HAL_SECRET_TOKEN=abc123`)
+
+## Secret Management
+
+HAL provides secure secret management to keep sensitive information like API keys, tokens, and passwords out of the conversation while still allowing the AI to use them in HTTP requests.
+
+### How It Works
+
+1. **Environment Variables**: Define secrets using the `HAL_SECRET_` prefix:
+   ```bash
+   HAL_SECRET_API_KEY=your-secret-api-key
+   HAL_SECRET_TOKEN=your-auth-token
+   HAL_SECRET_USERNAME=your-username
+   ```
+
+2. **Template Substitution**: Reference secrets in your requests using `{secrets.key}` syntax:
+   - **URLs**: `https://api.example.com/data?token={secrets.token}`
+   - **Headers**: `{"Authorization": "Bearer {secrets.api_key}"}`
+   - **Request Bodies**: `{"username": "{secrets.username}", "password": "{secrets.password}"}`
+
+3. **Security**: The AI never sees the actual secret values, only the template placeholders. Values are substituted at request time.
+
+### Example Usage
+
+```json
+{
+  "url": "https://api.github.com/user",
+  "headers": {
+    "Authorization": "Bearer {secrets.github_token}",
+    "Accept": "application/vnd.github.v3+json"
+  }
+}
+```
+
+The `{secrets.github_token}` will be replaced with the value of `HAL_SECRET_GITHUB_TOKEN` environment variable before making the request.
 
 ## Available Tools
 
 ### Built-in HTTP Tools
 
 These tools are always available regardless of configuration:
+
+#### `list-secrets`
+
+Get a list of available secret keys that can be used with `{secrets.key}` syntax.
+
+**Parameters:** None
+
+**Example Response:**
+```
+Available secrets (3 total):
+
+You can use these secret keys in your HTTP requests using the {secrets.key} syntax:
+
+1. {secrets.api_key}
+2. {secrets.github_token}  
+3. {secrets.username}
+
+Usage examples:
+- URL: "https://api.example.com/data?token={secrets.api_key}"
+- Header: {"Authorization": "Bearer {secrets.api_key}"}
+- Body: {"username": "{secrets.username}"}
+```
+
+**Security Note:** Only shows the key names, never the actual secret values.
 
 #### `http-get`
 
@@ -97,8 +160,9 @@ Make HTTP GET requests to any URL.
 **Example:**
 ```json
 {
-  "url": "https://api.github.com/users/octocat",
+  "url": "https://api.github.com/user",
   "headers": {
+    "Authorization": "Bearer {secrets.github_token}",
     "Accept": "application/vnd.github.v3+json"
   }
 }
@@ -117,10 +181,10 @@ Make HTTP POST requests with optional body and headers.
 **Example:**
 ```json
 {
-  "url": "https://httpbin.org/post",
-  "body": "{\"message\": \"Hello, World!\"}",
+  "url": "https://api.example.com/data",
+  "body": "{\"message\": \"Hello, World!\", \"user\": \"{secrets.username}\"}",
   "headers": {
-    "Authorization": "Bearer your-token-here"
+    "Authorization": "Bearer {secrets.api_key}"
   },
   "contentType": "application/json"
 }
