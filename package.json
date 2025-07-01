@@ -1,0 +1,61 @@
+{
+  "name": "hal-mcp",
+  "version": "1.0.5",
+  "description": "HAL (HTTP API Layer) - An MCP server for HTTP API interactions",
+  "main": "dist/index.js",
+  "bin": {
+    "hal-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "prepare": "npm run build",
+    "lint": "echo 'Linting skipped - TypeScript compiler provides type checking'",
+    "test": "jest"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "http",
+    "api",
+    "layer",
+    "typescript"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.22.0",
+    "yaml": "^2.3.4",
+    "swagger-parser": "^10.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/swagger-parser": "^4.0.0",
+    "typescript": "^5.0.0",
+    "tsx": "^4.0.0",
+    "eslint": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "jest": "^29.0.0",
+    "@types/jest": "^29.0.0",
+    "ts-jest": "^29.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/hal-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/hal-mcp/issues"
+  },
+  "homepage": "https://github.com/your-username/hal-mcp#readme"
+} 

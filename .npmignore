@@ -1,0 +1,44 @@
+# Source files
+src/
+tsconfig.json
+.eslintrc.json
+
+# Development files
+*.test.ts
+**/__tests__/
+
+# Build artifacts
+*.tsbuildinfo
+
+# Documentation (except README.md)
+docs/
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Coverage
+coverage/
+.nyc_output
+
+# Environment
+.env*
+
+# Development dependencies
+jest.config.js
+
+# Git
+.git/
+.gitignore
+
+# Example files
+claude-desktop-config.json
+test-hal.sh 
