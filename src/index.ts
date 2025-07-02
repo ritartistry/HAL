@@ -87,6 +87,61 @@ function matchesUrlPattern(url: string, pattern: string): boolean {
   return regex.test(url);
 }
 
+// Load global URL whitelist/blacklist from environment variables
+function loadGlobalUrlFilters(): { whitelist: string[] | null; blacklist: string[] | null } {
+  const whitelistEnv = process.env.HAL_WHITELIST_URLS;
+  const blacklistEnv = process.env.HAL_BLACKLIST_URLS;
+  
+  const whitelist = whitelistEnv ? 
+    whitelistEnv.split(',').map(url => url.trim()).filter(url => url.length > 0) : 
+    null;
+    
+  const blacklist = blacklistEnv ? 
+    blacklistEnv.split(',').map(url => url.trim()).filter(url => url.length > 0) : 
+    null;
+    
+  return { whitelist, blacklist };
+}
+
+// Check if a URL is allowed based on global whitelist/blacklist rules
+function isUrlAllowedGlobal(url: string): { allowed: boolean; reason?: string } {
+  const { whitelist, blacklist } = loadGlobalUrlFilters();
+  
+  // If both whitelist and blacklist are provided, prioritize whitelist
+  if (whitelist && blacklist) {
+    console.error('Warning: Both HAL_WHITELIST_URLS and HAL_BLACKLIST_URLS are set. Whitelist takes precedence.');
+  }
+  
+  // Check whitelist first (if present, only whitelisted URLs are allowed)
+  if (whitelist) {
+    for (const pattern of whitelist) {
+      if (matchesUrlPattern(url, pattern)) {
+        return { allowed: true };
+      }
+    }
+    return { 
+      allowed: false, 
+      reason: `URL '${url}' is not in the whitelist. Allowed patterns: ${whitelist.join(', ')}` 
+    };
+  }
+  
+  // Check blacklist (if present, blacklisted URLs are denied)
+  if (blacklist) {
+    for (const pattern of blacklist) {
+      if (matchesUrlPattern(url, pattern)) {
+        return { 
+          allowed: false, 
+          reason: `URL '${url}' is blacklisted. Blocked patterns: ${blacklist.join(', ')}` 
+        };
+      }
+    }
+    return { allowed: true };
+  }
+  
+  // If neither whitelist nor blacklist is set, allow all URLs
+  return { allowed: true };
+}
+
 // Load secrets from environment variables with HAL_SECRET_ prefix
 function loadSecrets(): void {
   secrets = {};
@@ -287,6 +342,14 @@ async function makeHttpRequest(
       }
     });
     
+    const finalUrl = urlObj.toString();
+    
+    // Check global URL whitelist/blacklist
+    const urlCheck = isUrlAllowedGlobal(finalUrl);
+    if (!urlCheck.allowed) {
+      throw new Error(urlCheck.reason || 'URL is not allowed');
+    }
+    
     const defaultHeaders = {
       'User-Agent': 'HAL-MCP/1.0.0',
       ...processedHeaders
@@ -297,7 +360,7 @@ async function makeHttpRequest(
        (defaultHeaders as any)['Content-Type'] = 'application/json';
      }
     
-    const response = await fetch(urlObj.toString(), {
+    const response = await fetch(finalUrl, {
       method: method.toUpperCase(),
       headers: defaultHeaders,
       body: processedBody
@@ -641,10 +704,10 @@ server.registerTool(
       response += "- Secrets are substituted securely at request time.\n";
       
       const restrictedCount = Object.values(secrets).filter(s => s.allowedUrls).length;
-      if (restrictedCount > 0) {
-        response += `- ${restrictedCount} secrets have URL restrictions for enhanced security.\n`;
-        response += "- If a secret is restricted, it will only work with URLs matching its allowed patterns.\n";
-      }
+              if (restrictedCount > 0) {
+          response += `- ${restrictedCount} secrets have URL restrictions for enhanced security.\n`;
+          response += "- If a secret is restricted, it will only work with URLs matching its allowed patterns.\n";
+        }
       
       return {
         content: [{

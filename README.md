@@ -85,6 +85,8 @@ HAL supports the following environment variables:
 - `HAL_API_BASE_URL`: Base URL for API requests (overrides the servers specified in the OpenAPI spec)
 - `HAL_SECRET_*`: Secret values for secure substitution in requests (e.g., `HAL_SECRET_TOKEN=abc123`)
 - `HAL_ALLOW_*`: URL restrictions for namespaced secrets (e.g., `HAL_ALLOW_MICROSOFT="https://azure.microsoft.com/*"`)
+- `HAL_WHITELIST_URLS`: Comma-separated list of URL patterns that are allowed (if set, only these URLs are permitted)
+- `HAL_BLACKLIST_URLS`: Comma-separated list of URL patterns that are blocked (if set, these URLs are denied)
 
 ## Secret Management
 
@@ -299,6 +301,56 @@ Non-namespaced secrets (without URL restrictions) continue to work as before:
 ```bash
 HAL_SECRET_API_KEY=your-key
 # Usage: {secrets.api_key} - works with any URL (no restrictions)
+```
+
+## URL Filtering
+
+HAL supports global URL filtering to control which URLs can be accessed through whitelist or blacklist patterns. This provides an additional security layer beyond the namespace-based secret restrictions.
+
+### Whitelist Mode
+
+When `HAL_WHITELIST_URLS` is set, **only** URLs matching the specified patterns are allowed:
+
+```bash
+# Only allow requests to GitHub and Google APIs
+HAL_WHITELIST_URLS="https://api.github.com/*,https://*.googleapis.com/*"
+```
+
+### Blacklist Mode
+
+When `HAL_BLACKLIST_URLS` is set, all URLs are allowed **except** those matching the specified patterns:
+
+```bash
+# Block requests to internal networks and localhost
+HAL_BLACKLIST_URLS="http://localhost:*,https://192.168.*,https://10.*,https://172.16.*"
+```
+
+### Pattern Syntax
+
+URL patterns support wildcard matching using `*`:
+
+- `https://api.example.com/*` - Matches any path under the API
+- `https://*.example.com/*` - Matches any subdomain
+- `*://internal.company.com/*` - Matches any protocol
+
+### Important Notes
+
+- **Whitelist takes precedence**: If both `HAL_WHITELIST_URLS` and `HAL_BLACKLIST_URLS` are set, the whitelist is used and a warning is logged
+- **Global filtering**: This applies to all HTTP requests, regardless of secrets or tools used
+- **Case-insensitive**: URL pattern matching is case-insensitive
+- **No filtering by default**: If neither environment variable is set, all URLs are allowed
+
+### Examples
+
+```bash
+# Production environment - only allow specific APIs
+HAL_WHITELIST_URLS="https://api.stripe.com/*,https://*.googleapis.com/*,https://api.github.com/*"
+
+# Development environment - block internal services
+HAL_BLACKLIST_URLS="http://localhost:*,https://192.168.*,https://admin.internal.com/*"
+
+# Restrictive setup - only allow HTTPS to specific domains
+HAL_WHITELIST_URLS="https://api.trusted-service.com/*,https://webhooks.trusted-service.com/*"
 ```
 
 ### Example Usage
