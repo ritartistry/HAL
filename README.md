@@ -2,14 +2,20 @@
 
 HAL is a Model Context Protocol (MCP) server that provides HTTP API capabilities to Large Language Models. It allows LLMs to make HTTP requests and interact with web APIs through a secure, controlled interface. HAL can also automatically generate tools from OpenAPI/Swagger specifications for seamless API integration.
 
+## Documentation
+
+**[Complete Documentation →](https://deanward.github.io/HAL/documentation/)**
+
+Visit our comprehensive documentation site for detailed guides, examples, and API reference.
+
 ## Features
 
-- 🌐 **HTTP GET/POST/PUT/PATCH/DELETE/OPTIONS/HEAD Requests**: Fetch and send data to any HTTP endpoint
-- 🔐 **Secure Secret Management**: Environment-based secrets with `{secrets.key}` substitution
-- 📄 **Swagger/OpenAPI Integration**: Automatically generate tools from API specifications
-- 📚 **Built-in Documentation**: Self-documenting API reference
-- 🔒 **Secure**: Runs in isolated environment with controlled access
-- ⚡ **Fast**: Built with TypeScript and optimized for performance
+- **HTTP GET/POST/PUT/PATCH/DELETE/OPTIONS/HEAD Requests**: Fetch and send data to any HTTP endpoint
+- **Secure Secret Management**: Environment-based secrets with `{secrets.key}` substitution
+- **Swagger/OpenAPI Integration**: Automatically generate tools from API specifications
+- **Built-in Documentation**: Self-documenting API reference
+- **Secure**: Runs in isolated environment with controlled access
+- **Fast**: Built with TypeScript and optimized for performance
 
 ## Usage
 
