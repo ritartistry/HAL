@@ -1,6 +1,6 @@
 {
   "name": "hal-mcp",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "HAL (HTTP API Layer) - An MCP server that provides HTTP API capabilities to Large Language Models with OpenAPI/Swagger integration",
   "main": "dist/index.js",
   "bin": {
