@@ -1,3 +1,5 @@
+[![MCP Badge](https://lobehub.com/badge/mcp/deanward-hal)](https://lobehub.com/mcp/deanward-hal)
+
 # HAL (HTTP API Layer)
 
 HAL is a Model Context Protocol (MCP) server that provides HTTP API capabilities to Large Language Models. It allows LLMs to make HTTP requests and interact with web APIs through a secure, controlled interface. HAL can also automatically generate tools from OpenAPI/Swagger specifications for seamless API integration.
