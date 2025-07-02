@@ -1,0 +1,92 @@
+---
+import Layout from './Layout.astro';
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+
+// Helper function to create proper URLs with base path
+function createUrl(path: string) {
+  const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+  return path === '' ? base + '/' : base + '/' + path.replace(/^\//, '');
+}
+---
+
+<Layout title={title}>
+  <div class="min-h-screen flex">
+    <!-- Sidebar Navigation -->
+    <aside class="w-80 border-r bg-card/50 flex-shrink-0">
+      <div class="sticky top-0 h-screen overflow-y-auto p-6">
+        <!-- Logo/Header -->
+        <div class="mb-8">
+          <a href={createUrl('')} class="flex items-center space-x-2">
+            <div class="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
+              <span class="text-primary-foreground font-bold text-lg">H</span>
+            </div>
+            <div>
+              <div class="font-bold text-foreground">HAL</div>
+              <div class="text-xs text-muted-foreground">HTTP API Layer</div>
+            </div>
+          </a>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="space-y-6">
+          <!-- Getting Started -->
+          <div>
+            <h3 class="font-semibold text-sm text-foreground mb-3">Getting Started</h3>
+            <ul class="space-y-1 text-sm">
+              <li><a href="#overview" class="text-muted-foreground hover:text-foreground transition-colors block py-1">Overview</a></li>
+              <li><a href="#features" class="text-muted-foreground hover:text-foreground transition-colors block py-1">Features</a></li>
+              <li><a href="#installation" class="text-muted-foreground hover:text-foreground transition-colors block py-1">Installation</a></li>
+            </ul>
+          </div>
+
+          <!-- Examples -->
+          <div>
+            <h3 class="font-semibold text-sm text-foreground mb-3">Examples</h3>
+            <ul class="space-y-1 text-sm">
+              <li><a href="#basic-setup" class="text-muted-foreground hover:text-foreground transition-colors block py-1">Basic Setup</a></li>
+              <li><a href="#swagger-setup" class="text-muted-foreground hover:text-foreground transition-colors block py-1">With Swagger/OpenAPI</a></li>
+              <li><a href="#basic-secrets" class="text-muted-foreground hover:text-foreground transition-colors block py-1">Basic Secrets</a></li>
+              <li><a href="#namespaced-secrets" class="text-muted-foreground hover:text-foreground transition-colors block py-1">Namespaced Secrets</a></li>
+              <li><a href="#url-whitelist" class="text-muted-foreground hover:text-foreground transition-colors block py-1">URL Whitelist</a></li>
+              <li><a href="#url-blacklist" class="text-muted-foreground hover:text-foreground transition-colors block py-1">URL Blacklist</a></li>
+            </ul>
+          </div>
+
+          <!-- Documentation -->
+          <div>
+            <h3 class="font-semibold text-sm text-foreground mb-3">Documentation</h3>
+            <ul class="space-y-1 text-sm">
+              <li><a href="#environment-variables" class="text-muted-foreground hover:text-foreground transition-colors block py-1">Environment Variables</a></li>
+              <li><a href="#how-secrets-work" class="text-muted-foreground hover:text-foreground transition-colors block py-1">Secret Management</a></li>
+              <li><a href="#built-in-tools" class="text-muted-foreground hover:text-foreground transition-colors block py-1">Available Tools</a></li>
+              <li><a href="#supported-features" class="text-muted-foreground hover:text-foreground transition-colors block py-1">OpenAPI Integration</a></li>
+              <li><a href="#security" class="text-muted-foreground hover:text-foreground transition-colors block py-1">Security</a></li>
+            </ul>
+          </div>
+
+          <!-- Advanced -->
+          <div>
+            <h3 class="font-semibold text-sm text-foreground mb-3">Advanced</h3>
+            <ul class="space-y-1 text-sm">
+              <li><a href="#namespaces" class="text-muted-foreground hover:text-foreground transition-colors block py-1">Namespaces</a></li>
+              <li><a href="#parsing-rules" class="text-muted-foreground hover:text-foreground transition-colors block py-1">Parsing Rules</a></li>
+              <li><a href="#api-documentation" class="text-muted-foreground hover:text-foreground transition-colors block py-1">API Documentation</a></li>
+            </ul>
+          </div>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 min-w-0">
+      <div class="max-w-4xl mx-auto p-8">
+        <slot />
+      </div>
+    </main>
+  </div>
+</Layout> 

@@ -1,0 +1,60 @@
+---
+import '../styles/global.css';
+
+export interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "HAL (HTTP API Layer) - A Model Context Protocol server that provides HTTP API capabilities to Large Language Models" } = Astro.props;
+
+// Helper function to create proper URLs with base path
+function createUrl(path: string) {
+  const base = import.meta.env.BASE_URL.replace(/\/$/, ''); // Remove trailing slash
+  return path === '' ? base + '/' : base + '/' + path.replace(/^\//, ''); // Add proper slash
+}
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content={description} />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+  </head>
+  <body class="min-h-screen">
+    <nav class="bg-card border-b border-border">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
+          <div class="flex items-center">
+            <a href={createUrl('')} class="text-xl font-bold text-primary">
+              HAL
+            </a>
+          </div>
+          <div class="flex items-center space-x-4">
+            <a href={createUrl('documentation')} class="text-muted-foreground hover:text-foreground px-3 py-2 rounded-md text-sm font-medium transition-colors">
+              Documentation
+            </a>
+           
+            <a href="https://github.com/DeanWard/HAL" class="text-muted-foreground hover:text-foreground px-3 py-2 rounded-md text-sm font-medium transition-colors">
+              GitHub
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+    
+    <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <slot />
+    </main>
+    
+    <footer class="bg-card border-t border-border mt-12">
+      <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-muted-foreground">
+        <p>&copy; 2024 HAL (HTTP API Layer). Licensed under the MIT License.</p>
+      </div>
+    </footer>
+  </body>
+</html> 

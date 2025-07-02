@@ -1,0 +1,380 @@
+---
+import DocsLayout from '../layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="API Reference - HAL (HTTP API Layer)">
+  <h1 class="text-4xl font-bold text-blue-400 mb-8">API Reference</h1>
+  
+  <p class="text-xl text-gray-300 mb-12">
+    Complete reference for all HAL HTTP API Layer tools and security features.
+  </p>
+
+  <!-- HTTP Methods -->
+  <section id="http-methods" class="mb-16">
+    <h2 class="text-3xl font-bold text-blue-400 mb-6">HTTP Methods</h2>
+    
+    <div class="space-y-8">
+      <!-- GET -->
+      <div class="bg-gray-800 rounded-lg p-6">
+        <h3 class="text-xl font-semibold text-green-400 mb-3">http-get</h3>
+        <p class="text-gray-300 mb-4">Perform HTTP GET requests to retrieve data from APIs.</p>
+        
+        <h4 class="text-lg font-semibold text-gray-200 mb-2">Parameters</h4>
+        <div class="bg-gray-900 p-4 rounded-lg mb-4">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-gray-600">
+                <th class="text-left py-2 text-blue-400">Parameter</th>
+                <th class="text-left py-2 text-blue-400">Type</th>
+                <th class="text-left py-2 text-blue-400">Required</th>
+                <th class="text-left py-2 text-blue-400">Description</th>
+              </tr>
+            </thead>
+            <tbody class="text-gray-300">
+              <tr class="border-b border-gray-700">
+                <td class="py-2 font-mono">url</td>
+                <td class="py-2">string</td>
+                <td class="py-2 text-green-400">Yes</td>
+                <td class="py-2">The URL to make the request to</td>
+              </tr>
+              <tr>
+                <td class="py-2 font-mono">headers</td>
+                <td class="py-2">object</td>
+                <td class="py-2 text-gray-400">No</td>
+                <td class="py-2">HTTP headers to include</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <h4 class="text-lg font-semibold text-gray-200 mb-2">Example</h4>
+        <div class="bg-gray-900 p-4 rounded-lg">
+          <pre class="text-sm text-gray-300"><code>{`{
+  "url": "https://api.github.com/user",
+  "headers": {
+    "Authorization": "Bearer {secrets.github_token}",
+    "Accept": "application/vnd.github.v3+json"
+  }
+}`}</code></pre>
+        </div>
+      </div>
+
+      <!-- POST -->
+      <div class="bg-gray-800 rounded-lg p-6">
+        <h3 class="text-xl font-semibold text-blue-400 mb-3">http-post</h3>
+        <p class="text-gray-300 mb-4">Create new resources by sending data to APIs.</p>
+        
+        <h4 class="text-lg font-semibold text-gray-200 mb-2">Parameters</h4>
+        <div class="bg-gray-900 p-4 rounded-lg mb-4">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-gray-600">
+                <th class="text-left py-2 text-blue-400">Parameter</th>
+                <th class="text-left py-2 text-blue-400">Type</th>
+                <th class="text-left py-2 text-blue-400">Required</th>
+                <th class="text-left py-2 text-blue-400">Description</th>
+              </tr>
+            </thead>
+            <tbody class="text-gray-300">
+              <tr class="border-b border-gray-700">
+                <td class="py-2 font-mono">url</td>
+                <td class="py-2">string</td>
+                <td class="py-2 text-green-400">Yes</td>
+                <td class="py-2">The URL to make the request to</td>
+              </tr>
+              <tr class="border-b border-gray-700">
+                <td class="py-2 font-mono">body</td>
+                <td class="py-2">string</td>
+                <td class="py-2 text-gray-400">No</td>
+                <td class="py-2">Request body data</td>
+              </tr>
+              <tr class="border-b border-gray-700">
+                <td class="py-2 font-mono">contentType</td>
+                <td class="py-2">string</td>
+                <td class="py-2 text-gray-400">No</td>
+                <td class="py-2">Content-Type header (default: application/json)</td>
+              </tr>
+              <tr>
+                <td class="py-2 font-mono">headers</td>
+                <td class="py-2">object</td>
+                <td class="py-2 text-gray-400">No</td>
+                <td class="py-2">Additional HTTP headers</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <h4 class="text-lg font-semibold text-gray-200 mb-2">Example</h4>
+        <div class="bg-gray-900 p-4 rounded-lg">
+          <pre class="text-sm text-gray-300"><code>{`{
+  "url": "https://api.github.com/repos/owner/repo/issues",
+  "body": "{\\"title\\": \\"Bug Report\\", \\"body\\": \\"Found an issue...\\"}",
+  "headers": {
+    "Authorization": "Bearer {secrets.github_token}",
+    "Accept": "application/vnd.github.v3+json"
+  }
+}`}</code></pre>
+        </div>
+      </div>
+
+      <!-- PUT -->
+      <div class="bg-gray-800 rounded-lg p-6">
+        <h3 class="text-xl font-semibold text-yellow-400 mb-3">http-put</h3>
+        <p class="text-gray-300 mb-4">Update or create resources with complete replacement.</p>
+        
+        <div class="text-sm text-gray-400 mb-2">Parameters: Same as http-post</div>
+      </div>
+
+      <!-- PATCH -->
+      <div class="bg-gray-800 rounded-lg p-6">
+        <h3 class="text-xl font-semibold text-orange-400 mb-3">http-patch</h3>
+        <p class="text-gray-300 mb-4">Partially update existing resources.</p>
+        
+        <div class="text-sm text-gray-400 mb-2">Parameters: Same as http-post</div>
+      </div>
+
+      <!-- DELETE -->
+      <div class="bg-gray-800 rounded-lg p-6">
+        <h3 class="text-xl font-semibold text-red-400 mb-3">http-delete</h3>
+        <p class="text-gray-300 mb-4">Remove resources from APIs.</p>
+        
+        <div class="text-sm text-gray-400 mb-2">Parameters: Same as http-get</div>
+      </div>
+
+      <!-- HEAD -->
+      <div class="bg-gray-800 rounded-lg p-6">
+        <h3 class="text-xl font-semibold text-purple-400 mb-3">http-head</h3>
+        <p class="text-gray-300 mb-4">Get response headers without the body content.</p>
+        
+        <div class="text-sm text-gray-400 mb-2">Parameters: Same as http-get</div>
+        <div class="text-sm text-gray-400">Returns only headers, no response body.</div>
+      </div>
+
+      <!-- OPTIONS -->
+      <div class="bg-gray-800 rounded-lg p-6">
+        <h3 class="text-xl font-semibold text-indigo-400 mb-3">http-options</h3>
+        <p class="text-gray-300 mb-4">Check allowed methods and CORS configuration.</p>
+        
+        <div class="text-sm text-gray-400 mb-2">Parameters: Same as http-get</div>
+        <div class="text-sm text-gray-400">Useful for CORS preflight checks and API discovery.</div>
+      </div>
+
+      <!-- Utility Tools -->
+      <div class="bg-gray-800 rounded-lg p-6">
+        <h3 class="text-xl font-semibold text-cyan-400 mb-3">list-secrets</h3>
+        <p class="text-gray-300 mb-4">List all available secret keys that can be used with {`{secrets.key}`} syntax.</p>
+        
+        <div class="text-sm text-gray-400 mb-2">No parameters required.</div>
+        <div class="text-sm text-gray-400">Returns only the key names, never the actual secret values.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Security -->
+  <section id="security" class="mb-16">
+    <h2 class="text-3xl font-bold text-blue-400 mb-6">Security Features</h2>
+    
+    <div class="space-y-8">
+      <!-- Secret Management -->
+      <div class="bg-gray-800 rounded-lg p-6">
+        <h3 class="text-xl font-semibold text-green-400 mb-4">Secret Substitution</h3>
+        <p class="text-gray-300 mb-4">
+          HAL provides secure secret management using environment variables with the <code class="text-blue-400">HAL_SECRET_</code> prefix.
+        </p>
+        
+        <div class="grid md:grid-cols-2 gap-6">
+          <div>
+            <h4 class="text-lg font-semibold text-gray-200 mb-2">Environment Setup</h4>
+            <div class="bg-gray-900 p-4 rounded-lg">
+              <pre class="text-sm text-gray-300"><code>{`export HAL_SECRET_API_KEY="your_secret_key"
+export HAL_SECRET_GITHUB_TOKEN="ghp_..."
+export HAL_SECRET_DATABASE_PASSWORD="..."
+`}</code></pre>
+            </div>
+          </div>
+          
+          <div>
+            <h4 class="text-lg font-semibold text-gray-200 mb-2">Usage in Requests</h4>
+            <div class="bg-gray-900 p-4 rounded-lg">
+              <pre class="text-sm text-gray-300"><code>{`{
+  "headers": {
+    "Authorization": "Bearer {secrets.api_key}",
+    "X-GitHub-Token": "{secrets.github_token}"
+  }
+}
+`}</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Namespaced Secrets -->
+      <div class="bg-gray-800 rounded-lg p-6">
+        <h3 class="text-xl font-semibold text-blue-400 mb-4">Namespaced Secrets & URL Restrictions</h3>
+        <p class="text-gray-300 mb-4">
+          Use namespaced secrets with URL restrictions to limit where secrets can be used.
+        </p>
+        
+        <div class="bg-gray-900 p-4 rounded-lg mb-4">
+          <pre class="text-sm text-gray-300"><code>{`# Environment setup
+export HAL_SECRET_STRIPE_SECRET_KEY="sk_live_..."
+export HAL_ALLOW_STRIPE="https://api.stripe.com/*"
+
+export HAL_SECRET_AWS-S3_ACCESS_KEY="AKIA..."
+export HAL_ALLOW_AWS-S3="https://*.amazonaws.com/*"
+`}</code></pre>
+        </div>
+        
+        <div class="bg-blue-900/20 border border-blue-600 rounded-lg p-4">
+          <p class="text-blue-300 text-sm">
+            <strong>Security:</strong> The <code>stripe</code> secret can only be used with Stripe API URLs, 
+            and the <code>aws-s3</code> secret only with AWS endpoints.
+          </p>
+        </div>
+      </div>
+
+      <!-- URL Filtering -->
+      <div class="bg-gray-800 rounded-lg p-6">
+        <h3 class="text-xl font-semibold text-yellow-400 mb-4">URL Filtering</h3>
+        <p class="text-gray-300 mb-4">
+          Control which URLs can be accessed using whitelist or blacklist patterns.
+        </p>
+        
+        <div class="grid md:grid-cols-2 gap-6">
+          <div>
+            <h4 class="text-lg font-semibold text-green-300 mb-2">Whitelist (Allow Only)</h4>
+            <div class="bg-gray-900 p-4 rounded-lg">
+              <pre class="text-sm text-gray-300"><code>{`export HAL_WHITELIST_URLS="\\
+https://api.github.com/*,\\
+https://*.googleapis.com/*,\\
+https://api.stripe.com/*"
+`}</code></pre>
+            </div>
+            <p class="text-sm text-gray-400 mt-2">Only these URL patterns will be allowed.</p>
+          </div>
+          
+          <div>
+            <h4 class="text-lg font-semibold text-red-300 mb-2">Blacklist (Block These)</h4>
+            <div class="bg-gray-900 p-4 rounded-lg">
+              <pre class="text-sm text-gray-300"><code>{`export HAL_BLACKLIST_URLS="\\
+http://localhost:*,\\
+https://192.168.*,\\
+https://10.*"
+`}</code></pre>
+            </div>
+            <p class="text-sm text-gray-400 mt-2">These URL patterns will be blocked.</p>
+          </div>
+        </div>
+        
+        <div class="bg-yellow-900/20 border border-yellow-600 rounded-lg p-4 mt-4">
+          <p class="text-yellow-300 text-sm">
+            <strong>Note:</strong> If both whitelist and blacklist are configured, whitelist takes precedence.
+          </p>
+        </div>
+      </div>
+
+      <!-- OpenAPI Integration -->
+      <div class="bg-gray-800 rounded-lg p-6">
+        <h3 class="text-xl font-semibold text-purple-400 mb-4">OpenAPI/Swagger Tools</h3>
+        <p class="text-gray-300 mb-4">
+          HAL automatically generates tools from OpenAPI specifications, creating type-safe API interactions.
+        </p>
+        
+        <div class="bg-gray-900 p-4 rounded-lg mb-4">
+          <pre class="text-sm text-gray-300"><code>{`# Configuration
+export HAL_SWAGGER_FILE="/path/to/openapi.yaml"
+export HAL_API_BASE_URL="https://api.example.com"
+`}</code></pre>
+        </div>
+        
+        <div class="space-y-4">
+          <div>
+            <h4 class="text-md font-semibold text-gray-200 mb-2">Auto-generated Tool Naming</h4>
+            <div class="bg-gray-900 p-3 rounded-lg">
+              <pre class="text-sm text-gray-300"><code>{`OpenAPI operationId: "getUserById"
+→ HAL tool name: "swagger_getUserById"
+
+OpenAPI operationId: "createPayment" 
+→ HAL tool name: "swagger_createPayment"
+`}</code></pre>
+            </div>
+          </div>
+          
+          <div>
+            <h4 class="text-md font-semibold text-gray-200 mb-2">Parameter Validation</h4>
+            <p class="text-sm text-gray-400">
+              All parameters are validated against the OpenAPI schema, ensuring type safety and required field validation.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Best Practices -->
+  <section class="mb-16">
+    <h2 class="text-3xl font-bold text-blue-400 mb-6">Security Best Practices</h2>
+    
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="bg-green-900/20 border border-green-600 rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-green-400 mb-4">✅ Recommended</h3>
+        <ul class="space-y-2 text-gray-300">
+          <li class="flex items-start space-x-2">
+            <span class="text-green-400 mt-1">•</span>
+            <span>Use namespaced secrets for different services</span>
+          </li>
+          <li class="flex items-start space-x-2">
+            <span class="text-green-400 mt-1">•</span>
+            <span>Set URL restrictions for sensitive secrets</span>
+          </li>
+          <li class="flex items-start space-x-2">
+            <span class="text-green-400 mt-1">•</span>
+            <span>Implement URL whitelisting in production</span>
+          </li>
+          <li class="flex items-start space-x-2">
+            <span class="text-green-400 mt-1">•</span>
+            <span>Use least-privilege API keys</span>
+          </li>
+          <li class="flex items-start space-x-2">
+            <span class="text-green-400 mt-1">•</span>
+            <span>Rotate secrets regularly</span>
+          </li>
+          <li class="flex items-start space-x-2">
+            <span class="text-green-400 mt-1">•</span>
+            <span>Validate OpenAPI schemas before deployment</span>
+          </li>
+        </ul>
+      </div>
+      
+      <div class="bg-red-900/20 border border-red-600 rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-red-400 mb-4">❌ Avoid</h3>
+        <ul class="space-y-2 text-gray-300">
+          <li class="flex items-start space-x-2">
+            <span class="text-red-400 mt-1">•</span>
+            <span>Hardcoding secrets in request templates</span>
+          </li>
+          <li class="flex items-start space-x-2">
+            <span class="text-red-400 mt-1">•</span>
+            <span>Using overly broad URL patterns</span>
+          </li>
+          <li class="flex items-start space-x-2">
+            <span class="text-red-400 mt-1">•</span>
+            <span>Reusing secrets across multiple services</span>
+          </li>
+          <li class="flex items-start space-x-2">
+            <span class="text-red-400 mt-1">•</span>
+            <span>Skipping namespace restrictions</span>
+          </li>
+          <li class="flex items-start space-x-2">
+            <span class="text-red-400 mt-1">•</span>
+            <span>Using production secrets in development</span>
+          </li>
+          <li class="flex items-start space-x-2">
+            <span class="text-red-400 mt-1">•</span>
+            <span>Allowing unrestricted localhost access</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</DocsLayout> 

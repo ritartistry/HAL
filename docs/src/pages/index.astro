@@ -1,0 +1,330 @@
+---
+import Layout from '../layouts/Layout.astro'
+import { Code } from 'astro:components';
+
+// Helper function to create proper URLs with base path
+function createUrl(path: string) {
+  const base = import.meta.env.BASE_URL.replace(/\/$/, '') // Remove trailing slash
+  return path === '' ? base + '/' : base + '/' + path.replace(/^\//, '') // Add proper slash
+}
+---
+
+<Layout title="HAL (HTTP API Layer)">
+  <div class="min-h-screen">
+    <!-- Version Banner -->
+    <div class="bg-muted/50 border-b border-border">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-center py-3 pb-8">
+          <div class="flex items-center gap-2 text-sm">
+            <span class="inline-flex items-center rounded-full bg-primary px-2 py-1 text-xs font-medium text-primary-foreground">
+              New
+            </span>
+            <span class="text-muted-foreground">Version 1.0.11 is now available with enhanced security and namespace support</span>
+            <a href="https://github.com/DeanWard/HAL/releases" class="text-primary hover:text-primary/80 font-medium">
+              →
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Hero Section -->
+    <section class="py-20 px-8">
+      <div class="max-w-4xl mx-auto text-center">
+        <div class="mb-8">
+          <div class="w-16 h-16 flex items-center justify-center mx-auto mb-6">
+            <img src={createUrl('HAL.png')} alt="HAL Logo" class="w-16 h-16 object-contain rounded-lg" />
+          </div>
+          <h1 class="text-5xl font-bold mb-4">
+            HAL <span class="text-muted-foreground">HTTP API Layer</span>
+          </h1>
+          <p class="text-xl text-muted-foreground max-w-3xl mx-auto">A Model Context Protocol server that provides HTTP API capabilities to Large Language Models. Make secure HTTP requests and optionally integrate with OpenAPI/Swagger specifications.</p>
+        </div>
+
+        <div class="flex justify-center gap-4 mb-12">
+          <a href={createUrl('documentation')} class="btn">Get Started</a>
+          <a href="https://github.com/DeanWard/HAL" class="btn-outline">View on GitHub</a>
+        </div>
+
+        <!-- Quick Install -->
+        <div class="max-w-2xl mx-auto">
+          <p class="text-sm text-muted-foreground mb-4 text-center">Add to your Claude Desktop config:</p>
+
+          <section class="text-center">
+            <div class="text-left block">
+              <Code lang="json" theme="github-dark" code={`{
+  "mcpServers": {
+    "hal": {
+      "command": "npx",
+      "args": ["hal-mcp"]
+    }
+  }
+}`} />
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="py-16 pt-4 px-8 bg-muted/20">
+      <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl font-bold mb-4">Core Features</h2>
+          <p class="text-muted-foreground">Everything you need for HTTP API integration with AI</p>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div class="card h-full flex flex-col">
+            <header class="flex-shrink-0">
+              <h3>Complete HTTP Support</h3>
+              <p>All HTTP methods supported</p>
+            </header>
+            <section class="flex-grow">
+              <p><code>GET</code>, <code>POST</code>, <code>PUT</code>, <code>PATCH</code>, <code>DELETE</code>, <code>OPTIONS</code>, and <code>HEAD</code> requests to interact with any HTTP endpoint.</p>
+            </section>
+          </div>
+
+          <div class="card h-full flex flex-col">
+            <header class="flex-shrink-0">
+              <h3>Secure Secret Management</h3>
+              <p>Environment-based secret handling</p>
+            </header>
+            <section class="flex-grow">
+              <p>Use template substitution with <code>{`{secrets.key}`}</code> syntax to keep sensitive information secure.</p>
+            </section>
+          </div>
+
+          <div class="card h-full flex flex-col">
+            <header class="flex-shrink-0">
+              <h3>OpenAPI Integration</h3>
+              <p>Automatic tool generation</p>
+            </header>
+            <section class="flex-grow">
+              <p>Automatically generate tools from OpenAPI/Swagger specifications for seamless API integration.</p>
+            </section>
+          </div>
+
+          <div class="card h-full flex flex-col">
+            <header class="flex-shrink-0">
+              <h3>Built-in Documentation</h3>
+              <p>Self-documenting API reference</p>
+            </header>
+            <section class="flex-grow">
+              <p>Access comprehensive usage examples through the built-in documentation resource.</p>
+            </section>
+          </div>
+
+          <div class="card h-full flex flex-col">
+            <header class="flex-shrink-0">
+              <h3>Security First</h3>
+              <p>Multiple layers of protection</p>
+            </header>
+            <section class="flex-grow">
+              <p>URL filtering, namespace restrictions, and isolated execution environment for maximum security.</p>
+            </section>
+          </div>
+
+          <div class="card h-full flex flex-col">
+            <header class="flex-shrink-0">
+              <h3>Fast & Modern</h3>
+              <p>TypeScript and performance optimized</p>
+            </header>
+            <section class="flex-grow">
+              <p>Built with TypeScript and optimized for performance with the latest MCP standards.</p>
+            </section>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Getting Started -->
+    <section class="py-16 px-8">
+      <div class="max-w-4xl mx-auto">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl font-bold mb-4">Quick Setup</h2>
+          <p class="text-muted-foreground">Get HAL running with Claude Desktop in minutes</p>
+        </div>
+
+        <div class="space-y-8">
+          <div class="space-y-4">
+            <h3 class="text-xl font-semibold">1. Configure Claude Desktop</h3>
+            <p class="text-muted-foreground">Add this to your Claude Desktop configuration (npx will automatically install and run HAL):</p>
+            <Code lang="json" theme="github-dark" code={`{
+  "mcpServers": {
+    "hal": {
+      "command": "npx",
+      "args": ["hal-mcp"]
+    }
+  }
+}`} />
+          </div>
+
+          <div class="space-y-4">
+            <h3 class="text-xl font-semibold">2. Start Making HTTP Requests</h3>
+            <p class="text-muted-foreground">Ask Claude to make HTTP requests using HAL's tools:</p>
+            <div class="card pb-0 pt-5">
+              <section>
+                <p class="text-sm italic">"Can you fetch the latest commits from the GitHub API for the microsoft/vscode repository?"</p>
+              </section>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Advanced Features -->
+    <section class="py-16 px-8 bg-muted/20">
+      <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl font-bold mb-4">Advanced Capabilities</h2>
+          <p class="text-muted-foreground">Professional features for production use</p>
+        </div>
+
+        <div class="space-y-8">
+          <!-- Namespace Management -->
+          <div class="card">
+            <header>
+              <h3>Namespace Management</h3>
+              <p>Organize secrets by service with URL restrictions for enhanced security</p>
+            </header>
+            <section>
+              <p class="mb-4">Use multi-level namespaces to organize secrets and restrict access to specific URLs:</p>
+              
+              <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h4 class="text-lg font-semibold mb-3">Environment Setup</h4>
+                  <Code lang="bash" theme="github-dark" code={`# Azure Storage secrets
+HAL_SECRET_AZURE-STORAGE_ACCESS_KEY="azure_storage_key_xxxxx"
+HAL_ALLOW_AZURE-STORAGE="https://*.blob.core.windows.net/*"
+
+# GitHub API secrets  
+HAL_SECRET_GITHUB_API_KEY="github_pat_xxxxx"
+HAL_ALLOW_GITHUB="https://api.github.com/*,https://*.github.com/*"
+
+# Google Cloud secrets
+HAL_SECRET_GOOGLE-CLOUD_SERVICE_ACCOUNT="google_service_account_json"
+HAL_ALLOW_GOOGLE-CLOUD="https://*.googleapis.com/*"`} />
+                </div>
+                
+                <div>
+                  <h4 class="text-lg font-semibold mb-3">Usage in Requests</h4>
+                  <Code lang="json" theme="github-dark" code={`{
+  "url": "https://mystorageaccount.blob.core.windows.net/container/file.txt",
+  "headers": {
+    "Authorization": "SharedKey mystorageaccount:{secrets.azure.storage.access_key}"
+  }
+}`} />
+                  <div class="mt-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                    <p class="text-sm text-green-700 dark:text-green-300">
+                      <strong>✓ Secure:</strong> This secret can only be used with Azure Storage URLs
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <!-- URL Filtering -->
+          <div class="card">
+            <header>
+              <h3>URL Filtering</h3>
+              <p>Control which URLs can be accessed with whitelist or blacklist patterns</p>
+            </header>
+            <section>
+              <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h4 class="text-lg font-semibold mb-3 text-green-600">Whitelist Mode</h4>
+                  <p class="text-sm text-muted-foreground mb-3">Only allow specific APIs (maximum security)</p>
+                  <Code lang="bash" theme="github-dark" code={`# Only allow trusted APIs
+HAL_WHITELIST_URLS="https://api.github.com/*,https://*.googleapis.com/*,https://api.stripe.com/*"
+
+# Optional: Add secrets for allowed APIs
+HAL_SECRET_GITHUB_TOKEN="your-github-token"
+HAL_SECRET_GOOGLE_API_KEY="your-google-key"`} />
+                </div>
+                
+                <div>
+                  <h4 class="text-lg font-semibold mb-3 text-red-600">Blacklist Mode</h4>
+                  <p class="text-sm text-muted-foreground mb-3">Block internal networks and sensitive endpoints</p>
+                  <Code lang="bash" theme="github-dark" code={`# Block internal networks
+HAL_BLACKLIST_URLS="http://localhost:*,https://192.168.*,https://10.*,https://172.16.*,https://admin.internal.com/*"
+
+# Allow all external APIs
+HAL_SECRET_API_KEY="your-external-api-key"`} />
+                </div>
+              </div>
+              
+              <div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <p class="text-sm text-blue-700 dark:text-blue-300">
+                  <strong>💡 Tip:</strong> Combine namespace restrictions with URL filtering for maximum security in production environments.
+                </p>
+              </div>
+            </section>
+          </div>
+
+          <!-- OpenAPI Integration -->
+          <div class="card">
+            <header>
+              <h3>OpenAPI/Swagger Integration</h3>
+              <p>Automatically generate tools from API specifications</p>
+            </header>
+            <section>
+              <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h4 class="text-lg font-semibold mb-3">Configuration</h4>
+                  <Code lang="bash" theme="github-dark" code={`# Point to your OpenAPI spec
+HAL_SWAGGER_FILE="/path/to/your/openapi.json"
+HAL_API_BASE_URL="https://api.example.com"
+
+# Add API credentials
+HAL_SECRET_API_KEY="your-api-key"`} />
+                </div>
+                
+                <div>
+                  <h4 class="text-lg font-semibold mb-3">Auto-generated Tools</h4>
+                                      <div class="space-y-3">
+                      <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <code class="text-sm">swagger_getUserById</code>
+                        <p class="text-xs text-muted-foreground mt-1">→ GET /users/{`{id}`}</p>
+                      </div>
+                      <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <code class="text-sm">swagger_createPayment</code>
+                        <p class="text-xs text-muted-foreground mt-1">→ POST /payments</p>
+                      </div>
+                      <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <code class="text-sm">swagger_updateOrder</code>
+                        <p class="text-xs text-muted-foreground mt-1">→ PUT /orders/{`{id}`}</p>
+                      </div>
+                    </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Latest Release -->
+    <section class="py-16 px-8">
+      <div class="max-w-4xl mx-auto text-center">
+        <h2 class="text-3xl font-bold mb-4">Latest Release</h2>
+        <div class="max-w-md mx-auto">
+          <div class="card">
+            <header>
+              <h3>Version 1.0.11</h3>
+              <p>Enhanced security and namespace support</p>
+            </header>
+            <section>
+              <p class="mb-4">Enhanced namespace and URL restrictions for secure secret management with improved error handling.</p>
+            </section>
+            <footer>
+              <a href="https://github.com/DeanWard/HAL/releases" class="btn-outline btn-sm">View all releases</a>
+            </footer>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</Layout>
+

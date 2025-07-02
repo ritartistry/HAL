@@ -11,28 +11,13 @@ HAL is a Model Context Protocol (MCP) server that provides HTTP API capabilities
 - 🔒 **Secure**: Runs in isolated environment with controlled access
 - ⚡ **Fast**: Built with TypeScript and optimized for performance
 
-## Installation
-
-### Via npx (Recommended)
-
-```bash
-npx hal-mcp
-```
-
-### Via npm
-
-```bash
-npm install -g hal-mcp
-hal-mcp
-```
-
 ## Usage
 
 HAL is designed to work with MCP-compatible clients. Here are some examples:
 
 ### Basic Usage (Claude Desktop)
 
-Add HAL to your Claude Desktop configuration:
+Add HAL to your Claude Desktop configuration (npx will automatically install and run HAL):
 
 ```json
 {

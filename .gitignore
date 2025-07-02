@@ -9,6 +9,11 @@ dist/
 build/
 *.tsbuildinfo
 
+# Documentation site build files
+docs/dist/
+docs/.astro/
+docs/node_modules/
+
 # Environment variables
 .env
 .env.local

@@ -1,0 +1,777 @@
+---
+import DocsLayout from '../layouts/DocsLayout.astro';
+import { Code } from 'astro:components';
+---
+
+<DocsLayout title="Documentation - HAL (HTTP API Layer)">
+  <div class="space-y-12">
+    <!-- Overview -->
+    <section id="overview">
+      <h1 class="text-4xl font-bold mb-6">HAL (HTTP API Layer)</h1>
+      <p class="text-lg text-muted-foreground mb-6">
+        HAL is a Model Context Protocol (MCP) server that provides HTTP API capabilities to Large Language Models. It allows LLMs to make HTTP requests and interact with web APIs through a secure, controlled interface. HAL can also automatically generate tools from OpenAPI/Swagger specifications for seamless API integration.
+      </p>
+    </section>
+
+    <!-- Features -->
+    <section id="features">
+      <h2 class="text-3xl font-bold mb-6">Features</h2>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="card">
+          <header>
+            <h3>HTTP Methods</h3>
+            <p>Complete support for all HTTP operations</p>
+          </header>
+          <section>
+            <p><code>GET</code>, <code>POST</code>, <code>PUT</code>, <code>PATCH</code>, <code>DELETE</code>, <code>OPTIONS</code>, and <code>HEAD</code> requests to fetch and send data to any HTTP endpoint.</p>
+          </section>
+        </div>
+        
+        <div class="card">
+          <header>
+            <h3>Secure Secret Management</h3>
+            <p>Environment-based secrets with template substitution</p>
+          </header>
+          <section>
+            <p>Use <code>{`{secrets.key}`}</code> substitution to keep sensitive information secure while enabling API access.</p>
+          </section>
+        </div>
+        
+        <div class="card">
+          <header>
+            <h3>OpenAPI Integration</h3>
+            <p>Automatic tool generation from API specifications</p>
+          </header>
+          <section>
+            <p>Automatically generate tools from Swagger/OpenAPI specifications for seamless API integration.</p>
+          </section>
+        </div>
+        
+        <div class="card">
+          <header>
+            <h3>Built-in Documentation</h3>
+            <p>Self-documenting API reference</p>
+          </header>
+          <section>
+            <p>Access comprehensive API documentation and usage examples through the built-in resource system.</p>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <!-- Installation -->
+    <section id="installation">
+      <h2 class="text-3xl font-bold mb-6">Installation</h2>
+      
+      <div class="alert">
+        <h3>Quick and Easy</h3>
+        <section>
+          <p>Just add HAL to your Claude Desktop configuration and npx will automatically download and run it.</p>
+        </section>
+      </div>
+    </section>
+
+    <!-- Configuration Examples -->
+    <section id="configuration-examples">
+      <h2 class="text-3xl font-bold mb-6">Configuration Examples</h2>
+      <p class="text-muted-foreground mb-6">
+        HAL is designed to work with MCP-compatible clients. Choose the configuration that best fits your needs:
+      </p>
+
+      <div class="space-y-12">
+        <!-- Basic Setup -->
+        <div id="basic-setup">
+          <h3 class="text-2xl font-semibold mb-4">Basic Setup</h3>
+          <p class="text-muted-foreground mb-4">
+            The simplest configuration with no environment variables. This gives you access to all the basic HTTP tools (<code>GET</code>, <code>POST</code>, <code>PUT</code>, etc.) for making requests to any public API.
+          </p>
+          <div class="card">
+            <header>
+              <h4>Basic Claude Desktop Configuration</h4>
+              <p>No environment variables needed - just add HAL and start making HTTP requests</p>
+            </header>
+            <section>
+              <Code lang="json" theme="github-dark" code={`{
+  "mcpServers": {
+    "hal": {
+      "command": "npx",
+      "args": ["hal-mcp"]
+    }
+  }
+}`} />
+              <p class="text-sm text-muted-foreground mt-4">
+                <h6 class="text-md font-bold">What you get</h6> Access to all basic HTTP tools (http-get, http-post, http-put, etc.) for making requests to public APIs.
+              </p>
+            </section>
+          </div>
+        </div>
+
+        <!-- Swagger Setup -->
+        <div id="swagger-setup">
+          <h3 class="text-2xl font-semibold mb-4">With Swagger/OpenAPI</h3>
+          <p class="text-muted-foreground mb-4">
+            Automatically generate tools from your OpenAPI/Swagger specification. HAL will create custom tools for each endpoint defined in your API spec.
+          </p>
+          <div class="card">
+            <header>
+              <h4>Swagger/OpenAPI Integration</h4>
+              <p>Enable automatic tool generation from API specifications</p>
+            </header>
+            <section>
+              <Code lang="json" theme="github-dark" code={`{
+  "mcpServers": {
+    "hal": {
+      "command": "npx",
+      "args": ["hal-mcp"],
+      "env": {
+        "HAL_SWAGGER_FILE": "/path/to/your/openapi.json",
+        "HAL_API_BASE_URL": "https://api.example.com"
+      }
+    }
+  }
+}`} />
+              <p class="text-sm text-muted-foreground mt-4">
+                <h6 class="text-md font-bold">What you get</h6> Basic HTTP tools PLUS auto-generated tools for each endpoint in your OpenAPI spec (named swagger_{`{operationId}`}).
+              </p>
+            </section>
+          </div>
+        </div>
+
+        <!-- Basic Secrets -->
+        <div id="basic-secrets">
+          <h3 class="text-2xl font-semibold mb-4">Basic Secrets</h3>
+          <p class="text-muted-foreground mb-4">
+            Securely store API keys, tokens, and other sensitive data using environment variables. The AI never sees the actual values.
+          </p>
+          <div class="card">
+            <header>
+              <h4>Simple Secret Management</h4>
+              <p>Keep API keys and tokens secure with {`{secrets.key}`} substitution</p>
+            </header>
+            <section>
+              <Code lang="json" theme="github-dark" code={`{
+  "mcpServers": {
+    "hal": {
+      "command": "npx",
+      "args": ["hal-mcp"],
+      "env": {
+        "HAL_SECRET_API_KEY": "your-secret-api-key",
+        "HAL_SECRET_TOKEN": "your-auth-token",
+        "HAL_SECRET_USERNAME": "your-username",
+        "HAL_SECRET_PASSWORD": "your-password"
+      }
+    }
+  }
+}`} />
+              <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <p class="text-sm font-medium mb-2">How the AI can use these secrets:</p>
+                <ul class="text-sm space-y-1">
+                  <li><code>Authorization: Bearer {`{secrets.api_key}`}</code></li>
+                  <li><code>X-Auth-Token: {`{secrets.token}`}</code></li>
+                  <li><code>https://api.example.com/data?token={`{secrets.api_key}`}</code></li>
+                </ul>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <!-- Namespaced Secrets -->
+        <div id="namespaced-secrets">
+          <h3 class="text-2xl font-semibold mb-4">Namespaced Secrets with URL Restrictions</h3>
+          <p class="text-muted-foreground mb-4">
+            Organize secrets by service and restrict them to specific URLs for enhanced security. Perfect for managing multiple API providers.
+          </p>
+          <div class="card">
+            <header>
+              <h4>Advanced Secret Organization</h4>
+              <p>Namespace secrets and restrict them to specific domains</p>
+            </header>
+            <section>
+              <Code lang="json" theme="github-dark" code={`{
+  "mcpServers": {
+    "hal": {
+      "command": "npx",
+      "args": ["hal-mcp"],
+      "env": {
+        "HAL_SECRET_GITHUB_API_KEY": "github_pat_xxxxx",
+        "HAL_ALLOW_GITHUB": "https://api.github.com/*,https://*.github.com/*",
+        
+        "HAL_SECRET_AZURE-STORAGE_ACCESS_KEY": "azure_storage_key_xxxxx",
+        "HAL_SECRET_AZURE-COGNITIVE_API_KEY": "azure_cognitive_key_xxxxx",
+        "HAL_ALLOW_AZURE-STORAGE": "https://*.blob.core.windows.net/*",
+        "HAL_ALLOW_AZURE-COGNITIVE": "https://*.cognitiveservices.azure.com/*",
+        
+        "HAL_SECRET_GOOGLE-CLOUD_SERVICE_ACCOUNT": "google_service_account_json",
+        "HAL_ALLOW_GOOGLE-CLOUD": "https://*.googleapis.com/*,https://*.googlecloud.com/*"
+      }
+    }
+  }
+}`} />
+              <div class="mt-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <p class="text-sm font-medium mb-2">How the AI can use these namespaced secrets:</p>
+                <ul class="text-sm space-y-1">
+                  <li><code>{`{secrets.github.api_key}`}</code> - Only works with GitHub URLs</li>
+                  <li><code>{`{secrets.azure.storage.access_key}`}</code> - Only works with Azure Storage</li>
+                  <li><code>{`{secrets.google.cloud.service_account}`}</code> - Only works with Google APIs</li>
+                </ul>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <!-- URL Whitelist -->
+        <div id="url-whitelist">
+          <h3 class="text-2xl font-semibold mb-4">URL Whitelist</h3>
+          <p class="text-muted-foreground mb-4">
+            Restrict HAL to only make requests to specific, trusted domains. All other URLs will be blocked.
+          </p>
+          <div class="card">
+            <header>
+              <h4>Whitelist Mode - Maximum Security</h4>
+              <p>Only allow requests to explicitly approved URLs</p>
+            </header>
+            <section>
+              <Code lang="json" theme="github-dark" code={`{
+  "mcpServers": {
+    "hal": {
+      "command": "npx",
+      "args": ["hal-mcp"],
+      "env": {
+        "HAL_WHITELIST_URLS": "https://api.github.com/*,https://*.googleapis.com/*,https://httpbin.org/*",
+        "HAL_SECRET_GITHUB_TOKEN": "your-github-token",
+        "HAL_SECRET_GOOGLE_API_KEY": "your-google-api-key"
+      }
+    }
+  }
+}`} />
+              <div class="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                <p class="text-sm font-medium mb-2">Security Note:</p>
+                <p class="text-sm">When whitelist is active, <strong>only</strong> URLs matching the patterns will be accessible. All other requests will be blocked with an error.</p>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <!-- URL Blacklist -->
+        <div id="url-blacklist">
+          <h3 class="text-2xl font-semibold mb-4">URL Blacklist</h3>
+          <p class="text-muted-foreground mb-4">
+            Block specific URLs or patterns while allowing everything else. Useful for preventing access to internal networks or specific services.
+          </p>
+          <div class="card">
+            <header>
+              <h4>Blacklist Mode - Selective Blocking</h4>
+              <p>Block specific URLs while allowing everything else</p>
+            </header>
+            <section>
+              <Code lang="json" theme="github-dark" code={`{
+  "mcpServers": {
+    "hal": {
+      "command": "npx",
+      "args": ["hal-mcp"],
+      "env": {
+        "HAL_BLACKLIST_URLS": "http://localhost:*,https://192.168.*,https://10.*,https://172.16.*,https://169.254.*",
+        "HAL_SECRET_API_KEY": "your-external-api-key"
+      }
+    }
+  }
+}`} />
+              <div class="mt-4 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                <p class="text-sm font-medium mb-2">Security Note:</p>
+                <p class="text-sm">This example blocks access to localhost and common internal network ranges, while allowing all external APIs.</p>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Environment Variables -->
+    <section id="environment-variables">
+      <h2 class="text-3xl font-bold mb-6">Environment Variables</h2>
+      <p class="text-muted-foreground mb-6">
+        HAL supports the following environment variables for configuration:
+      </p>
+
+      <div class="overflow-x-auto">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Variable</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>HAL_SWAGGER_FILE</code></td>
+              <td>Path to OpenAPI/Swagger specification file (JSON or YAML format)</td>
+            </tr>
+            <tr>
+              <td><code>HAL_API_BASE_URL</code></td>
+              <td>Base URL for API requests (overrides the servers specified in the OpenAPI spec)</td>
+            </tr>
+            <tr>
+              <td><code>HAL_SECRET_*</code></td>
+              <td>Secret values for secure substitution in requests (e.g., <code>HAL_SECRET_TOKEN=abc123</code>)</td>
+            </tr>
+            <tr>
+              <td><code>HAL_ALLOW_*</code></td>
+              <td>URL restrictions for namespaced secrets (e.g., <code>HAL_ALLOW_MICROSOFT="https://azure.microsoft.com/*"</code>)</td>
+            </tr>
+            <tr>
+              <td><code>HAL_WHITELIST_URLS</code></td>
+              <td>Comma-separated list of URL patterns that are allowed (if set, only these URLs are permitted)</td>
+            </tr>
+            <tr>
+              <td><code>HAL_BLACKLIST_URLS</code></td>
+              <td>Comma-separated list of URL patterns that are blocked (if set, these URLs are denied)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Secret Management -->
+    <section id="how-secrets-work">
+      <h2 class="text-3xl font-bold mb-6">Secret Management</h2>
+      <p class="text-muted-foreground mb-6">
+        HAL provides secure secret management to keep sensitive information like API keys, tokens, and passwords out of the conversation while still allowing the AI to use them in HTTP requests.
+      </p>
+
+      <div class="space-y-8">
+        <div>
+          <h3 class="text-xl font-semibold mb-4">How It Works</h3>
+          <div class="space-y-4">
+            <div class="card">
+              <header>
+                <h4>1. Environment Variables</h4>
+                <p>Define secrets using the <code>HAL_SECRET_</code> prefix</p>
+              </header>
+              <section>
+                <pre><code>HAL_SECRET_API_KEY=your-secret-api-key
+HAL_SECRET_TOKEN=your-auth-token
+HAL_SECRET_USERNAME=your-username</code></pre>
+              </section>
+            </div>
+
+            <div class="card">
+              <header>
+                <h4>2. Template Substitution</h4>
+                <p>The AI can reference secrets in its requests using <code>{`{secrets.key}`}</code> syntax</p>
+              </header>
+              <section>
+                <ul class="space-y-2 text-sm">
+                  <li><strong>URLs:</strong> <code>https://api.example.com/data?token={`{secrets.token}`}</code></li>
+                  <li><strong>Headers:</strong> <code>{`{"Authorization": "Bearer {secrets.api_key}"}`}</code></li>
+                  <li><strong>Request Bodies:</strong> <code>{`{"username": "{secrets.username}", "password": "{secrets.password}"}`}</code></li>
+                </ul>
+              </section>
+            </div>
+
+            <div class="card">
+              <header>
+                <h4>3. Security</h4>
+                <p>The AI never sees the actual secret values</p>
+              </header>
+              <section>
+                <p>The AI only sees the template placeholders like <code>{`{secrets.api_key}`}</code>. When the AI makes a request using these placeholders, HAL substitutes the actual secret values at request time.</p>
+              </section>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Namespaces -->
+    <section id="namespaces">
+      <h2 class="text-3xl font-bold mb-6">Namespaces and URL Restrictions</h2>
+      <p class="text-muted-foreground mb-6">
+        HAL supports organizing secrets into namespaces and restricting them to specific URLs for enhanced security.
+      </p>
+
+      <div class="space-y-8">
+        <div>
+          <h3 class="text-xl font-semibold mb-4">Namespace Convention</h3>
+          <p class="text-muted-foreground mb-4">
+            Use <code>-</code> for namespace separators and <code>_</code> for word separators within keys:
+          </p>
+          <pre><code># Single namespace
+HAL_SECRET_MICROSOFT_API_KEY=your-api-key
+# AI can use: {`{secrets.microsoft.api_key}`}
+
+# Multi-level namespaces
+HAL_SECRET_AZURE-STORAGE_ACCESS_KEY=your-storage-key
+HAL_SECRET_AZURE-COGNITIVE_API_KEY=your-cognitive-key
+HAL_SECRET_GOOGLE-CLOUD-STORAGE_SERVICE_ACCOUNT_KEY=your-service-key
+# AI can use: {`{secrets.azure.storage.access_key}`}
+# AI can use: {`{secrets.azure.cognitive.api_key}`}
+# AI can use: {`{secrets.google.cloud.storage.service_account_key}`}</code></pre>
+        </div>
+
+        <div>
+          <h3 class="text-xl font-semibold mb-4">URL Restrictions</h3>
+          <p class="text-muted-foreground mb-4">
+            Restrict namespaced secrets to specific URLs using <code>HAL_ALLOW_*</code> environment variables:
+          </p>
+          <pre><code># Restrict Microsoft secrets to Microsoft domains
+HAL_SECRET_MICROSOFT_API_KEY=your-api-key
+HAL_ALLOW_MICROSOFT="https://azure.microsoft.com/*,https://*.microsoft.com/*"
+
+# Restrict Azure Storage secrets to Azure storage endpoints
+HAL_SECRET_AZURE-STORAGE_ACCESS_KEY=your-storage-key
+HAL_ALLOW_AZURE-STORAGE="https://*.blob.core.windows.net/*,https://*.queue.core.windows.net/*"
+
+# Multiple URLs are comma-separated
+HAL_SECRET_GOOGLE-CLOUD_API_KEY=your-google-key
+HAL_ALLOW_GOOGLE-CLOUD="https://*.googleapis.com/*,https://*.googlecloud.com/*"</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Parsing Rules -->
+    <section id="parsing-rules">
+      <h2 class="text-3xl font-bold mb-6">How Parsing Works</h2>
+      <p class="text-muted-foreground mb-6">
+        Understanding how environment variable names become template keys:
+      </p>
+
+      <div class="card">
+        <header>
+          <h3>Step-by-step breakdown</h3>
+          <p>Example: <code>HAL_SECRET_AZURE-STORAGE_ACCESS_KEY</code></p>
+        </header>
+        <section>
+          <ol class="space-y-2 text-sm">
+            <li><strong>1.</strong> Remove <code>HAL_SECRET_</code> prefix → <code>AZURE-STORAGE_ACCESS_KEY</code></li>
+            <li><strong>2.</strong> Split on first <code>_</code> → Namespace: <code>AZURE-STORAGE</code>, Key: <code>ACCESS_KEY</code></li>
+            <li><strong>3.</strong> Transform namespace: <code>AZURE-STORAGE</code> → <code>azure.storage</code> (dashes become dots, lowercase)</li>
+            <li><strong>4.</strong> Transform key: <code>ACCESS_KEY</code> → <code>access_key</code> (underscores stay, lowercase)</li>
+            <li><strong>5.</strong> Combine: <code>{`{secrets.azure.storage.access_key}`}</code></li>
+          </ol>
+        </section>
+        <footer>
+          <span class="badge">Final template: <code>{`{secrets.azure.storage.access_key}`}</code></span>
+        </footer>
+      </div>
+    </section>
+
+
+
+    <!-- Available Tools -->
+    <section id="built-in-tools">
+      <h2 class="text-3xl font-bold mb-6">Available Tools</h2>
+      
+      <div class="space-y-8">
+        <div>
+          <h3 class="text-xl font-semibold mb-4">Built-in HTTP Tools</h3>
+          <p class="text-muted-foreground mb-6">
+            These tools are always available regardless of configuration:
+          </p>
+
+          <div class="grid gap-6">
+            <div class="card">
+              <header>
+                <h4><code>list-secrets</code></h4>
+                <p>Get a list of available secret keys</p>
+              </header>
+              <section>
+                <p class="mb-4">Get a list of available secret keys that can be used with <code>{`{secrets.key}`}</code> syntax.</p>
+                <p class="text-sm text-muted-foreground"><strong>Security Note:</strong> Only shows the key names, never the actual secret values.</p>
+              </section>
+            </div>
+
+            <div class="card">
+              <header>
+                <h4><code>http-get</code></h4>
+                <p>Make HTTP GET requests to any URL</p>
+              </header>
+              <section>
+                <p class="mb-4"><strong>Parameters:</strong></p>
+                <ul class="text-sm space-y-1 mb-4">
+                  <li><code>url</code> (string, required): The URL to request</li>
+                  <li><code>headers</code> (object, optional): Additional headers to send</li>
+                </ul>
+                <Code lang="json" theme="github-dark" code={`{
+  "url": "https://api.github.com/user",
+  "headers": {
+    "Authorization": "Bearer {secrets.github_token}",
+    "Accept": "application/vnd.github.v3+json"
+  }
+}`} />
+              </section>
+            </div>
+
+            <div class="card">
+              <header>
+                <h4><code>http-post</code></h4>
+                <p>Make HTTP POST requests with optional body and headers</p>
+              </header>
+              <section>
+                <p class="mb-4"><strong>Parameters:</strong></p>
+                <ul class="text-sm space-y-1 mb-4">
+                  <li><code>url</code> (string, required): The URL to request</li>
+                  <li><code>body</code> (string, optional): Request body content</li>
+                  <li><code>headers</code> (object, optional): Additional headers to send</li>
+                  <li><code>contentType</code> (string, optional): Content-Type header (default: "application/json")</li>
+                </ul>
+                <Code lang="json" theme="github-dark" code={`{
+  "url": "https://api.example.com/data",
+  "body": "{\\"message\\": \\"Hello, World!\\", \\"user\\": \\"{secrets.username}\\"}",
+  "headers": {
+    "Authorization": "Bearer {secrets.api_key}"
+  },
+  "contentType": "application/json"
+}`} />
+              </section>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- OpenAPI Integration -->
+    <section id="supported-features">
+      <h2 class="text-3xl font-bold mb-6">OpenAPI/Swagger Integration</h2>
+      
+      <div class="space-y-8">
+        <div>
+          <h3 class="text-xl font-semibold mb-4">Supported OpenAPI Features</h3>
+          <div class="grid md:grid-cols-2 gap-4">
+            <ul class="space-y-2 text-sm">
+              <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> OpenAPI 3.x and Swagger 2.x specifications</li>
+              <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> JSON and YAML format support</li>
+                             <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Path parameters (<code>/users/{`{id}`}</code>)</li>
+              <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Query parameters</li>
+              <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Request body (JSON, form-encoded)</li>
+            </ul>
+            <ul class="space-y-2 text-sm">
+              <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> All HTTP methods</li>
+              <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Parameter validation</li>
+              <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Required/optional parameter handling</li>
+              <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Custom headers support</li>
+          </ul>
+          </div>
+        </div>
+        
+        <div>
+          <h3 class="text-xl font-semibold mb-4">Auto-generated Swagger/OpenAPI Tools</h3>
+          <p class="text-muted-foreground mb-4">
+            When you provide a Swagger/OpenAPI specification via <code>HAL_SWAGGER_FILE</code>, HAL will automatically generate tools for each endpoint defined in the specification.
+          </p>
+          <p class="text-muted-foreground mb-6">
+                         These tools are named using the pattern <code>swagger_{`{operationId}`}</code> and include automatic parameter validation, path parameter substitution, and proper HTTP method mapping.
+          </p>
+        <div class="alert alert-warning mb-6">
+          <strong>⚠️ Warning:</strong> Large OpenAPI/Swagger specifications may generate a very large number of tools. This can clutter your toolset and impact performance. Consider limiting your specification to only the endpoints you need.
+        </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Resources -->
+    <section id="api-documentation">
+      <h2 class="text-3xl font-bold mb-6">Available Resources</h2>
+      
+      <div class="card">
+        <header>
+          <h3><code>docs://hal/api</code></h3>
+          <p>Comprehensive API documentation and usage examples</p>
+        </header>
+        <section>
+          <p>Access comprehensive API documentation and usage examples, including documentation for any auto-generated Swagger tools.</p>
+        </section>
+      </div>
+    </section>
+
+    <!-- Security -->
+    <section id="security">
+      <h2 class="text-3xl font-bold mb-6">Security Considerations</h2>
+      <p class="text-muted-foreground mb-6">
+        HAL provides powerful HTTP capabilities that require careful security consideration. Follow these best practices to keep your data and systems safe.
+      </p>
+      
+      <div class="space-y-8">
+        <!-- Secret Management Security -->
+        <div>
+          <h3 class="text-xl font-semibold mb-4">Secret Management</h3>
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="card">
+              <header>
+                <h4>Environment Variables</h4>
+                <p>Keep sensitive data secure</p>
+              </header>
+              <section>
+                <ul class="text-sm space-y-2">
+                  <li>• Store all API keys, tokens, and passwords in environment variables</li>
+                  <li>• Never hardcode secrets in your configuration files</li>
+                  <li>• Use <code>{`{secrets.key}`}</code> substitution to reference secrets safely</li>
+                  <li>• The AI never sees the actual secret values, only the template placeholders</li>
+                </ul>
+              </section>
+            </div>
+            
+            <div class="card">
+              <header>
+                <h4>Namespace Restrictions</h4>
+                <p>Limit secret scope with URL restrictions</p>
+              </header>
+              <section>
+                <ul class="text-sm space-y-2">
+                  <li>• Use <code>HAL_ALLOW_*</code> to restrict secrets to specific domains</li>
+                  <li>• Organize secrets by service using namespaces</li>
+                  <li>• Prevent credential leakage across different APIs</li>
+                  <li>• Follow the principle of least privilege</li>
+                </ul>
+              </section>
+            </div>
+          </div>
+        </div>
+
+        <!-- Network Security -->
+        <div>
+          <h3 class="text-xl font-semibold mb-4">Network Security</h3>
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="card">
+              <header>
+                <h4>URL Access Control</h4>
+                <p>Control which endpoints HAL can access</p>
+              </header>
+              <section>
+                <div class="space-y-3">
+                  <div>
+                    <p class="text-sm font-medium mb-1">Whitelist Mode (Recommended)</p>
+                    <p class="text-xs text-muted-foreground">Only allow specific, trusted domains</p>
+                    <Code lang="bash" theme="github-dark" code={`HAL_WHITELIST_URLS="https://api.github.com/*,https://*.googleapis.com/*"`} />
+                  </div>
+                  <div>
+                    <p class="text-sm font-medium mb-1">Blacklist Mode</p>
+                    <p class="text-xs text-muted-foreground">Block internal networks and sensitive endpoints</p>
+                    <Code lang="bash" theme="github-dark" code={`HAL_BLACKLIST_URLS="http://localhost:*,https://192.168.*,https://10.*"`} />
+                  </div>
+                </div>
+              </section>
+            </div>
+            
+            <div class="card">
+              <header>
+                <h4>HTTPS and TLS</h4>
+                <p>Secure communication protocols</p>
+              </header>
+              <section>
+                <ul class="text-sm space-y-2">
+                  <li>• Always use HTTPS for production APIs</li>
+                  <li>• Verify SSL certificates are valid</li>
+                  <li>• Avoid HTTP for sensitive data transmission</li>
+                  <li>• Consider certificate pinning for high-security environments</li>
+                </ul>
+              </section>
+            </div>
+          </div>
+        </div>
+
+        <!-- API Usage Security -->
+        <div>
+          <h3 class="text-xl font-semibold mb-4">API Usage Best Practices</h3>
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="card">
+              <header>
+                <h4>Rate Limiting & Quotas</h4>
+                <p>Respect API limits and prevent abuse</p>
+              </header>
+              <section>
+                <ul class="text-sm space-y-2">
+                  <li>• Monitor API usage to avoid hitting rate limits</li>
+                  <li>• Implement retry logic with exponential backoff</li>
+                  <li>• Be aware of daily/monthly quota restrictions</li>
+                  <li>• Consider caching responses when appropriate</li>
+                </ul>
+              </section>
+            </div>
+            
+            <div class="card">
+              <header>
+                <h4>Authentication & Authorization</h4>
+                <p>Properly secure API access</p>
+              </header>
+              <section>
+                <ul class="text-sm space-y-2">
+                  <li>• Use strong authentication methods (OAuth, API keys)</li>
+                  <li>• Implement proper authorization checks</li>
+                  <li>• Rotate API keys and tokens regularly</li>
+                  <li>• Use scoped permissions when available</li>
+                </ul>
+              </section>
+            </div>
+          </div>
+        </div>
+
+        <!-- OpenAPI Security -->
+        <div>
+          <h3 class="text-xl font-semibold mb-4">OpenAPI/Swagger Security</h3>
+          <div class="card">
+            <header>
+                              <h4>Specification Trust</h4>
+              <p>Ensure your API specifications come from trusted sources</p>
+            </header>
+            <section>
+              <div class="space-y-4">
+                <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                                     <p class="text-sm font-medium mb-2">Important Warnings:</p>
+                  <ul class="text-sm space-y-1">
+                    <li>• Large OpenAPI specs can generate hundreds of tools, impacting performance</li>
+                    <li>• Only use specifications from trusted, verified sources</li>
+                    <li>• Review the generated tools before using them in production</li>
+                    <li>• Consider limiting specifications to only the endpoints you need</li>
+                  </ul>
+                </div>
+                
+                <div class="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                                     <p class="text-sm font-medium mb-2">Best Practices:</p>
+                  <ul class="text-sm space-y-1">
+                    <li>• Validate OpenAPI specifications before deployment</li>
+                    <li>• Use version-controlled specifications when possible</li>
+                    <li>• Test generated tools in a development environment first</li>
+                    <li>• Monitor tool usage and API calls in production</li>
+                  </ul>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <!-- Security Checklist -->
+        <div>
+          <h3 class="text-xl font-semibold mb-4">Security Checklist</h3>
+          <div class="card">
+            <header>
+                              <h4>Pre-deployment Checklist</h4>
+              <p>Verify these security measures before going live</p>
+            </header>
+            <section>
+              <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h5 class="font-medium mb-2">Configuration Security</h5>
+                  <ul class="text-sm space-y-1">
+                    <li>☐ All secrets stored in environment variables</li>
+                    <li>☐ URL restrictions configured (whitelist/blacklist)</li>
+                    <li>☐ Namespace restrictions applied where needed</li>
+                    <li>☐ No hardcoded credentials in configuration</li>
+                  </ul>
+                </div>
+                <div>
+                  <h5 class="font-medium mb-2">Runtime Security</h5>
+                  <ul class="text-sm space-y-1">
+                    <li>☐ HTTPS enabled for all external APIs</li>
+                    <li>☐ Rate limiting awareness and monitoring</li>
+                    <li>☐ Network firewall rules reviewed</li>
+                    <li>☐ API permissions follow least privilege principle</li>
+                  </ul>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </section>
+    </div>
+</DocsLayout> 
