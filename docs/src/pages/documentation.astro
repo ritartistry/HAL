@@ -30,10 +30,10 @@ import { Code } from 'astro:components';
         <div class="card">
           <header>
             <h3>Secure Secret Management</h3>
-            <p>Environment-based secrets with template substitution</p>
+            <p>Environment-based secrets with automatic redaction</p>
           </header>
           <section>
-            <p>Use <code>{`{secrets.key}`}</code> substitution to keep sensitive information secure while enabling API access.</p>
+            <p>Use <code>{`{secrets.key}`}</code> substitution to keep sensitive information secure while enabling API access. All responses are automatically scanned and any secret values are redacted with <code>[REDACTED]</code> before reaching the AI.</p>
           </section>
         </div>
         
@@ -625,6 +625,49 @@ HAL_ALLOW_GOOGLE-CLOUD="https://*.googleapis.com/*,https://*.googlecloud.com/*"<
               </section>
             </div>
           </div>
+          
+          <!-- Automatic Secret Redaction -->
+          <div class="mt-8">
+            <h4 class="text-lg font-semibold mb-4">🔐 Automatic Secret Redaction</h4>
+            <div class="card">
+              <header>
+                <h5>Response Protection</h5>
+                <p>All responses are automatically scanned and secrets are redacted</p>
+              </header>
+              <section>
+                <div class="space-y-4">
+                  <p class="text-sm">
+                    HAL automatically redacts secret values from all responses sent back to the AI, providing an additional layer of security against credential exposure.
+                  </p>
+                  
+                  <div class="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                    <p class="text-sm font-medium mb-2">⚠️ Before (Vulnerable):</p>
+                    <Code lang="text" theme="github-dark" code={`Error: Request cannot be constructed from a URL that includes credentials: 
+https://65GQiI8-1JCOWV1KAuYr0g:-VOIfpydl2GWfucCdEJ1BJ2vrsJyjQ@www.reddit.com/api/v1/access_token`} />
+                  </div>
+                  
+                  <div class="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                    <p class="text-sm font-medium mb-2">✅ After (Secure):</p>
+                    <Code lang="text" theme="github-dark" code={`Error: Request cannot be constructed from a URL that includes credentials: 
+https://[REDACTED]:[REDACTED]@www.reddit.com/api/v1/access_token`} />
+                  </div>
+                  
+                  <div class="text-sm space-y-2">
+                    <p class="font-medium">What gets redacted:</p>
+                    <ul class="space-y-1 ml-4">
+                      <li>• Error messages (including URL parsing errors)</li>
+                      <li>• Response headers (in case APIs echo back auth data)</li>
+                      <li>• Response bodies (protecting against sensitive API responses)</li>
+                      <li>• All other text returned to the AI</li>
+                    </ul>
+                    <p class="text-xs text-muted-foreground mt-3">
+                      <strong>Note:</strong> This protection is automatic and requires no configuration. HAL tracks all secret values and replaces them with [REDACTED] before any text reaches the AI.
+                    </p>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
         </div>
 
         <!-- Network Security -->
@@ -756,6 +799,7 @@ HAL_ALLOW_GOOGLE-CLOUD="https://*.googleapis.com/*,https://*.googlecloud.com/*"<
                     <li>☐ URL restrictions configured (whitelist/blacklist)</li>
                     <li>☐ Namespace restrictions applied where needed</li>
                     <li>☐ No hardcoded credentials in configuration</li>
+                    <li>☐ Automatic secret redaction is enabled (default)</li>
                   </ul>
                 </div>
                 <div>

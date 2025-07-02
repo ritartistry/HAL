@@ -13,7 +13,7 @@ Visit our comprehensive documentation site for detailed guides, examples, and AP
 ## Features
 
 - **HTTP GET/POST/PUT/PATCH/DELETE/OPTIONS/HEAD Requests**: Fetch and send data to any HTTP endpoint
-- **Secure Secret Management**: Environment-based secrets with `{secrets.key}` substitution
+- **Secure Secret Management**: Environment-based secrets with `{secrets.key}` substitution and automatic redaction
 - **Swagger/OpenAPI Integration**: Automatically generate tools from API specifications
 - **Built-in Documentation**: Self-documenting API reference
 - **Secure**: Runs in isolated environment with controlled access
@@ -100,6 +100,37 @@ HAL provides secure secret management to keep sensitive information like API key
    - **Request Bodies**: `{"username": "{secrets.username}", "password": "{secrets.password}"}`
 
 3. **Security**: The AI never sees the actual secret values, only the template placeholders. Values are substituted at request time.
+
+### Automatic Secret Redaction
+
+HAL automatically redacts secret values from all responses sent back to the AI, providing an additional layer of security against credential exposure.
+
+#### How It Works
+
+1. **Secret Tracking**: HAL maintains a registry of all secret values from environment variables
+2. **Response Scanning**: All HTTP responses (headers, bodies, error messages) are scanned for secret values
+3. **Automatic Replacement**: Any occurrence of actual secret values is replaced with `[REDACTED]` before sending to the AI
+4. **Comprehensive Coverage**: Redaction applies to:
+   - Error messages (including URL parsing errors that might expose credentials)
+   - Response headers (in case APIs echo back authentication data)
+   - Response bodies (protecting against API responses that might include sensitive data)
+   - All other text returned to the AI
+
+#### Example Protection
+
+**Before (vulnerable):**
+```
+Error: Request cannot be constructed from a URL that includes credentials: 
+https://65GQiI8-1JCOWV1KAuYr0g:-VOIfpydl2GWfucCdEJ1BJ2vrsJyjQ@www.reddit.com/api/v1/access_token
+```
+
+**After (secure):**
+```
+Error: Request cannot be constructed from a URL that includes credentials: 
+https://[REDACTED]:[REDACTED]@www.reddit.com/api/v1/access_token
+```
+
+This protection is automatic and requires no configuration - HAL will redact any secret values regardless of how they appear in responses, ensuring that even if an API or error message attempts to expose credentials, the AI never sees the actual values.
 
 ### Namespaces and URL Restrictions
 

@@ -5,6 +5,29 @@ All notable changes to HAL (HTTP API Layer) will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.13] - 2024-12-27
+
+### Added
+- 🔐 **Automatic Secret Redaction**: All responses sent to the AI are automatically scanned and secret values are replaced with `[REDACTED]`
+- **Comprehensive Protection**: Redaction applies to error messages, response headers, response bodies, and all text returned to the AI
+- **Zero Configuration**: Automatic redaction is enabled by default and requires no setup - HAL tracks all secret values and redacts them automatically
+
+### Security
+- **Credential Exposure Prevention**: Prevents AI from seeing actual secret values even when they appear in error messages or API responses
+- **URL Parsing Error Protection**: Fixes vulnerability where URLs with embedded credentials could expose secrets in error messages
+- **Response Header Scanning**: Protects against APIs that might echo back authentication data in response headers
+- **Response Body Protection**: Guards against API responses that might contain sensitive information
+
+### Enhanced
+- Updated documentation with redaction examples and security explanations
+- Added visual before/after examples showing credential protection
+- Enhanced security checklist to include automatic redaction verification
+- Improved feature descriptions to highlight automatic protection
+
+### Example Protection
+- **Before**: `Error: Request cannot be constructed from a URL that includes credentials: https://secret-id:secret-key@api.example.com/`
+- **After**: `Error: Request cannot be constructed from a URL that includes credentials: https://[REDACTED]:[REDACTED]@api.example.com/`
+
 ## [1.0.9] - 2024-12-26
 
 ### Added

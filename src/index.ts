@@ -18,6 +18,7 @@ interface SecretInfo {
   value: string;
   namespace?: string;
   allowedUrls?: string[];
+  templateKey: string; // Store the original template key for redaction
 }
 
 interface SecretsStore {
@@ -25,6 +26,31 @@ interface SecretsStore {
 }
 
 let secrets: SecretsStore = {};
+
+// Function to redact secrets from text
+function redactSecretsFromText(text: string): string {
+  if (!text || typeof text !== 'string') {
+    return text;
+  }
+  
+  let redactedText = text;
+  
+  // Replace all secret values with [REDACTED] 
+  for (const [templateKey, secretInfo] of Object.entries(secrets)) {
+    if (secretInfo.value && secretInfo.value.length > 0) {
+      // Use a global regex to replace all instances of the secret value
+      const regex = new RegExp(escapeRegExp(secretInfo.value), 'g');
+      redactedText = redactedText.replace(regex, '[REDACTED]');
+    }
+  }
+  
+  return redactedText;
+}
+
+// Helper function to escape special regex characters
+function escapeRegExp(string: string): string {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
 // Parse namespace and key from environment variable name
 function parseSecretKey(envKey: string): { namespace: string | undefined, key: string, templateKey: string } {
@@ -154,7 +180,8 @@ function loadSecrets(): void {
       const secretInfo: SecretInfo = {
         value,
         namespace,
-        allowedUrls: namespace ? urlRestrictions[namespace] : undefined
+        allowedUrls: namespace ? urlRestrictions[namespace] : undefined,
+        templateKey
       };
       
       secrets[templateKey] = secretInfo;
@@ -394,22 +421,25 @@ async function makeHttpRequest(
       }
     }
 
+    // Redact secrets from response headers and content before returning
+    const redactedHeaders = Array.from(response.headers.entries())
+      .map(([key, value]) => `${key}: ${redactSecretsFromText(value)}`)
+      .join('\n');
+    const redactedContent = redactSecretsFromText(content);
+
          return {
        content: [{
          type: "text" as const,
-         text: `Status: ${response.status} ${response.statusText}\n\nHeaders:\n${
-           Array.from(response.headers.entries())
-             .map(([key, value]) => `${key}: ${value}`)
-             .join('\n')
-         }\n\nBody:\n${content}`
+         text: `Status: ${response.status} ${response.statusText}\n\nHeaders:\n${redactedHeaders}\n\nBody:\n${redactedContent}`
        }]
      };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const redactedErrorMessage = redactSecretsFromText(errorMessage);
          return {
        content: [{
          type: "text" as const,
-         text: `Error making ${method.toUpperCase()} request: ${errorMessage}`
+         text: `Error making ${method.toUpperCase()} request: ${redactedErrorMessage}`
        }],
        isError: true
      };
@@ -716,10 +746,11 @@ server.registerTool(
         }]
       };
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       return {
         content: [{
           type: "text" as const,
-          text: `Error listing secrets: ${error instanceof Error ? error.message : 'Unknown error'}`
+          text: `Error listing secrets: ${redactSecretsFromText(errorMessage)}`
         }],
         isError: true
       };
