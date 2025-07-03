@@ -1,6 +1,6 @@
 {
   "name": "hal-mcp",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "HAL (HTTP API Layer) - An MCP server that provides HTTP API capabilities to Large Language Models with OpenAPI/Swagger integration",
   "main": "dist/index.js",
   "bin": {
@@ -11,7 +11,6 @@
     "dev": "tsx src/index.ts",
     "start": "node dist/index.js",
     "prepare": "npm run build",
-    "lint": "echo 'Linting skipped - TypeScript compiler provides type checking'",
     "test": "jest"
   },
   "keywords": [
